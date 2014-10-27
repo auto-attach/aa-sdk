@@ -1,0 +1,18 @@
+      How to Install the Auto Attach SDK on Linux
+      ===========================================
+
+This document describes how to build and install the AA SDK on a generic Linux
+host.
+
+
+Build Requirements
+------------------
+
+To compile the userspace programs in the Open vSwitch distribution, you will
+need the following software:
+
+    - GNU make.
+
+    - A C compiler, such as:
+
+        * GCC 4.x.
