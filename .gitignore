@@ -1,0 +1,6 @@
+# aa-sdk.git/.gitignore
+*.o
+*~
+#
+cscope.out
+
