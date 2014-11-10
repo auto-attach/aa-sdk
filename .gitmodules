@@ -1,0 +1,3 @@
+[submodule "lldp"]
+	path = lldp
+	url = https://github.com/auto-attach/aa-lldpd
