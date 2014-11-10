@@ -32,6 +32,32 @@ typedef struct {
     uint32_t ageout_cnt;
 } aasdk_transport_port_stats_t;
 
+typedef struct {
+    uint32_t time_mark; //...TBD
+    uint32_t index; //...TBD
+
+    /* Chassis/System */
+    uint32_t chassis_id_len;
+    uint32_t chassis_id_subtype;
+    char chassis_id[AASDK_TLV_VALUE_LEN_MAX];
+    char chassis_name[AASDK_TLV_STRING_LEN_MAX];  /* sys_name */
+    char chassis_descr[AASDK_TLV_STRING_LEN_MAX]; /* sys_descr */
+    uint32_t chassis_cap_supported;
+    uint32_t chassis_cap_enabled;
+
+    /* Port */ 
+    uint32_t port_id_len;
+    uint32_t port_id_subtype;
+    char port_id[AASDK_TLV_VALUE_LEN_MAX];
+    char port_descr[AASDK_TLV_STRING_LEN_MAX];
+                            
+    /* Auto Attach: Element */
+    uint8_t     elem_system_id[AASDK_TLV_SYSTEM_ID_LEN];
+    uint32_t    elem_type;
+    uint32_t    elem_mgmt_vlan;
+
+} aatrans_disc_neighbor_entry_t;
+
 int aatransi_ports_data_ena_set(bool enable);
 int aatransi_port_data_ena_set(aasdk_port_id_t port_id, bool enable);
 int aatransi_port_admin_get(uint32_t port_id);

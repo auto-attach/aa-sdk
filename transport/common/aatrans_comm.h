@@ -16,7 +16,7 @@
 #ifndef AATRANS_COMM_H
 #define AATRANS_COMM_H
 
-#include <stddef.h>
+#include "lldpd.h"
 
 #define AASDK_MAC_ADDR_LEN              6
 #define AASDK_TLV_STRING_LEN_MAX        256
@@ -62,11 +62,26 @@ typedef struct {
 } aasdk_transport_config_t;
 
 typedef struct {
+    uint32_t aa_element_type;
+    uint32_t aa_element_mgmt_vlan;
+    TAILQ_HEAD(, lldpd_chassis) g_chassis;
+    aasdk_transport_send_func_t send; /* function to send a frame */
+//...TBD
+//   mappings_by_isid;
+} lldp_cfg_ext_t;
+
+typedef struct {
     uint32_t inserts;
     uint32_t deletes;
     uint32_t drops;
     uint32_t ageouts;
 } aasdk_transport_global_stats_t;
+
+extern struct lldpd *lldp_cfg;
+extern lldp_cfg_ext_t cfg_ext;
+#define cfg lldp_cfg
+
+void lldpd_assign_cfg_to_protocols(struct lldpd *cfg);
 
 int aatransi_global_init(aasdk_transport_config_t *config);
 int aatransi_global_configure(void);
@@ -96,8 +111,7 @@ int aatransi_packet_process(char *buffer, uint32_t buf_size, aasdk_port_id_t por
 int aatransi_packet_compose(char *buffer, uint32_t buf_size, aasdk_port_id_t port_id);
 int aatransi_send_pdu(void);
 int aatransx_auth_key_set(aasdk_port_id_t port_id,
-                          uint8_t *key, 
-                          size_t key_len);
+                          uint8_t *key, size_t key_len);
 int aatransx_auth_ena_set(aasdk_port_id_t port_id, bool enable);
 
 void aatransi_print_lldp_and_aa_stats(print_func_t print_func, void *arg);
