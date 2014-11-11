@@ -20,6 +20,7 @@ OBJS =	aasdk_comm.o \
 	aasdk_msg_comm.o \
 	aasdk_time_comm.o \
 	aasdk_port_comm.o \
+	aasdk_lldpif_comm.o \
 	aasdk_elem_comm.o
 
 CPPFLAGS = -I. -I../common -I../agent -I../../platform/posix

@@ -19,7 +19,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include "aasdk_trace_plat.h"
 #include "aatrans_trace_comm.h"
+
+bool aasdk_trace_enabled = false;
 
 /* keep this table in-sync with aasdk_trc_mod_t */
 aasdk_trc_mod_t aasdk_trc_mod_list[aasdk_mod_max] = {

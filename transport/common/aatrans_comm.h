@@ -16,6 +16,7 @@
 #ifndef AATRANS_COMM_H
 #define AATRANS_COMM_H
 
+#include <stdbool.h>
 #include "lldpd.h"
 
 #define AASDK_MAC_ADDR_LEN              6

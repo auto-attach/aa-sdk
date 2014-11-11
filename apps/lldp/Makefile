@@ -1,4 +1,4 @@
-# aa-sdk/apps/engtest/Makefile
+# aa-sdk/apps/lldp/Makefile
 #
 # Copyright (c) 2014, Avaya Inc.
 #
@@ -14,11 +14,17 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-# engineering test files
+# lldp application files
 
-OBJS =	aasdk_engtest.o
+OBJS =	aasdk_lldp.o
 
-CPPFLAGS = -I. -I../../common/common -I../../common/agent -I../../platform/posix 
+CPPFLAGS = -I. \
+        -I../../common/common \
+        -I../../transport/common \
+        -DENABLE_AA \
+        -I../../lldp/src/daemon \
+        -I../../lldp/src \
+        -I../../lldp
 
 clean:
 	rm -f $(OBJS)
@@ -26,5 +32,5 @@ clean:
 posix: $(OBJS)
 
 $(OBJS) : %.o: %.c
-	$(CC) -c -g $(CPPFLAGS) $(CFLAGS) $< -o $@
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 

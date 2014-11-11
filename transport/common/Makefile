@@ -38,5 +38,5 @@ clean:
 posix: $(OBJS)
 
 $(OBJS) : %.o: %.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+	$(CC) -c -g $(CPPFLAGS) $(CFLAGS) $< -o $@
 

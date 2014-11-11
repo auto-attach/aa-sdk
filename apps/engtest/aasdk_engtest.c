@@ -26,6 +26,7 @@
 
 
 void *clock_thread(void *arg);
+void aatransi_initialize(void);
 
 
 int
@@ -39,15 +40,15 @@ main(void)
 
   printf("aasdk: initializing...\n");
 
+  aatransi_initialize();
+
   aa_rc = aasdki_global_init();
 
   printf("aasdk: aasdki_global_init() = %d\n", aa_rc);
 
-
   aa_rc = aasdki_output_set(-1, printf);
 
   printf("aasdk: aasdki_output_set() = %d\n", aa_rc);
-
 
 
   /* start the clock thread */

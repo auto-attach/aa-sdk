@@ -18,6 +18,7 @@ OUTPUT = aasdk_engtest
 
 OBJS = \
 	apps/engtest/aasdk_engtest.o \
+	apps/lldp/aasdk_lldp.o \
 	common/agent/aa_port.o \
 	common/agent/aa_agent.o \
 	common/agent/aa_server.o \
@@ -28,10 +29,25 @@ OBJS = \
 	common/common/aasdk_msg_comm.o \
 	common/common/aasdk_port_comm.o \
 	common/common/aasdk_time_comm.o \
+	common/common/aasdk_lldpif_comm.o \
 	platform/posix/aasdk_msgif_plat.o \
 	platform/posix/aasdk_osif_plat.o \
 	platform/posix/aasdk_time_plat.o \
-	platform/stubs/aasdk_lldpif_plat.o
+	platform/posix/aasdk_lldpif_plat.o \
+	platform/posix/aasdk_trace_plat.o \
+	lldp/src/compat/strlcpy.o \
+	lldp/src/daemon/liblldpd_la-frame.o \
+	lldp/src/daemon/liblldpd_la-lldp.o \
+	lldp/src/daemon/liblldpd_la-lldpd.o \
+	lldp/src/lldpd-structs.o \
+	lldp/src/log.o \
+	transport/common/aatrans_trace_comm.o \
+        transport/common/aatrans_auth_comm.o \
+	transport/common/aatrans_elem_comm.o \
+	transport/common/aatrans_packet_comm.o \
+	transport/common/aatrans_port_comm.o \
+	transport/common/aatrans_time_comm.o \
+	transport/common/aatrans_comm.o 
 
 
 LIBS = \
