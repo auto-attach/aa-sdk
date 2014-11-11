@@ -27,7 +27,6 @@ OBJS =	aatrans_trace_comm.o \
 CFLAGS = -I. -I../../common/common \
         -DENABLE_AA \
         -DHAVE_LLDP \
-        -DAA_SDK_INTEGRATION \
 	-I../../platform/stubs \
 	-I../../lldp/src/daemon \
 	-I../../lldp/src \

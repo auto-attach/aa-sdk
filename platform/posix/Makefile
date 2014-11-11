@@ -16,11 +16,19 @@
 
 # platform files
 
-OBJS = 	aasdk_msgif_plat.o \
-	aasdk_osif_plat.o \
-	aasdk_time_plat.o
+OBJS =  aasdk_lldpif_plat.o \
+        aasdk_msgif_plat.o \
+        aasdk_osif_plat.o \
+        aasdk_time_plat.o
 
-CPPFLAGS = -I. -I../../common/common
+CPPFLAGS = -I. -I../../common/common \
+        -I../../transport/common \
+        -DENABLE_AA \
+        -DHAVE_LLDP \
+        -I../../platform/stubs \
+        -I../../lldp/src/daemon \
+        -I../../lldp/src \
+        -I../../lldp
 
 clean:
 	rm -f $(OBJS)

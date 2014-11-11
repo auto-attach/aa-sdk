@@ -27,6 +27,12 @@ OBJS =	aatrans_trace_comm.o \
 
 CPPFLAGS = -I. -I../../common/common \
 	-I../common \
+        -DENABLE_AA \
+        -DHAVE_LLDP \
+        -I../../platform/stubs \
+        -I../../lldp/src/daemon \
+        -I../../lldp/src \
+        -I../../lldp
 
 clean:
 	rm -f $(OBJS)
