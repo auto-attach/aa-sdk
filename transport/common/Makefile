@@ -1,4 +1,4 @@
-# aa-sdk/common/common/Makefile
+# aa-sdk/transport/common/Makefile
 #
 # Copyright (c) 2014, Avaya Inc.
 #

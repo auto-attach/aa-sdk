@@ -1,4 +1,4 @@
-# aa-sdk/common/common/Makefile
+# aa-sdk/transport/stubs/Makefile
 #
 # Copyright (c) 2014, Avaya Inc.
 #
@@ -16,8 +16,7 @@
 
 # common files
 
-OBJS =	aatrans_trace_comm.o \
-	aatrans_time_comm.o \
+OBJS =	aatrans_time_comm.o \
 	aatrans_port_comm.o \
 	aatrans_packet_comm.o \
 	aatrans_elem_comm.o \

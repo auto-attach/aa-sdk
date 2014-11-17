@@ -19,8 +19,7 @@
 OBJS =  aasdk_lldpif_plat.o \
         aasdk_msgif_plat.o \
         aasdk_osif_plat.o \
-        aasdk_time_plat.o \
-        aasdk_trace_plat.o
+        aasdk_time_plat.o 
 
 CPPFLAGS = -I. -I../../common/common \
         -I../../transport/common \

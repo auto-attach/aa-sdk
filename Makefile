@@ -34,7 +34,6 @@ OBJS = \
 	platform/posix/aasdk_osif_plat.o \
 	platform/posix/aasdk_time_plat.o \
 	platform/posix/aasdk_lldpif_plat.o \
-	platform/posix/aasdk_trace_plat.o \
 	lldp/src/compat/strlcpy.o \
 	lldp/src/daemon/liblldpd_la-frame.o \
 	lldp/src/daemon/liblldpd_la-lldp.o \

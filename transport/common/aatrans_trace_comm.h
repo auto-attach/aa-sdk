@@ -64,8 +64,6 @@ void aasdku_report(aasdk_trc_mod_id_t mod_id, const char *file, uint32_t line,
     aasdku_report(AASDK_TRC_MOD_ID, __FILE__, __LINE__, __FUNCTION__, ##args); \
 } while (0)
 
-void aasdkx_puts(const char *strbuf);
-
 #define AA_TRACE_MAX_LINE_LENGTH 1024          // Max 1024 bytes per trace line
 
 #endif /* AATRANS_TRACE_PLAT_H */

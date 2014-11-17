@@ -19,7 +19,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdarg.h>
-#include "aasdk_trace_plat.h"
+#include "aasdk_comm.h"
 #include "aatrans_trace_comm.h"
 
 bool aasdk_trace_enabled = false;
@@ -58,6 +58,6 @@ void aasdku_report(aasdk_trc_mod_id_t mod_id, const char *file, uint32_t line,
     charsPrinted = vsnprintf(pBuf, AA_TRACE_MAX_LINE_LENGTH-1-prefix_len, format, args); /* this excludes '\0' */
     va_end(args);
 
-    aasdkx_puts(buf);
+    (*aasdk_output_func)(buf);
 }
 
