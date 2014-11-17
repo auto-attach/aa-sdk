@@ -41,9 +41,6 @@ aasdk_output_func_t aasdk_output_func;
 int
 aasdki_global_init(void)
 {
-    aasdk_output_flags = 0;
-    aasdk_output_func  = NULL;
-
     FA_AGT_init(NULL);
     faAgent_main_init();
 
@@ -124,6 +121,12 @@ aasdki_glbl_stats_clr(void)
     return AA_SDK_ENONE;
 }
 
+void
+aasdki_output_init(void)
+{
+  aasdk_output_flags = 0;
+  aasdk_output_func  = NULL;
+}
 
 int
 aasdki_output_set(unsigned int         output_flags,

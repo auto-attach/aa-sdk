@@ -46,6 +46,8 @@ typedef int (*aasdk_output_func_t)(const char *, ...);
 int aasdki_output_set(unsigned int         output_flags,
                       aasdk_output_func_t  output_func);
 
+void aasdki_output_init(void);
+
 extern unsigned int        aasdk_output_flags;
 extern aasdk_output_func_t aasdk_output_func;
 
