@@ -1,4 +1,12 @@
 
+Post - v0.00.1
+--------------
+    - Provide preliminary version of code to implement the auto attach (AA)
+      server functionality for Linux.
+    - Provide preliminary version of LLDP code used by the AA SDK. This is not
+      a full LLDP implementation. Rather only the mandatory LLDP TLVs and the
+      extended AA TLVs are supported.
+
 v0.00.1 - October 27, 2014
 --------------------------
     - Initial public release
