@@ -53,9 +53,8 @@ LIBS = \
 	-lpthread \
 	-lrt
 
-SRCDIRS = apps/engtest apps/lldp common/agent common/common common/stubs platform/posix platform/stubs transport/common transport/stubs
-SUBDIRS = $(SRCDIRS)
-CLEANDIRS = $(SRCDIRS)
+SUBDIRS = apps/engtest apps/lldp common/agent common/common common/stubs platform/posix platform/stubs transport/common transport/stubs
+CLEANDIRS = $(SUBDIRS:%=clean-%)
 
 
 .PHONY: subdirs $(SUBDIRS)
@@ -77,8 +76,11 @@ lldpnew: FORCE
 lldp:   FORCE
 	/bin/bash -c 'cd lldp; make -j'
 
+$(CLEANDIRS):
+	$(MAKE) -C $(@:clean-%=%) clean
+
 clean: $(CLEANDIRS)
-	rm -f $(OUTPUT)
+	rm -f $(OUTPUT) $(OBJS)
 	/bin/bash -c 'cd lldp; make clean'
 
 distclean: clean
