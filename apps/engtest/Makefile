@@ -23,6 +23,8 @@ CPPFLAGS = -I. -I../../common/common -I../../common/agent -I../../platform/posix
 clean:
 	rm -f $(OBJS)
 
+all: posix
+
 posix: $(OBJS)
 
 $(OBJS) : %.o: %.c

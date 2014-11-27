@@ -27,6 +27,8 @@ CPPFLAGS = -I. -I../common -I../../platform/stubs
 clean:
 	rm -f $(OBJS)
 
+all: stubs
+
 stubs: $(OBJS)
 
 $(OBJS) : %.o: %.c

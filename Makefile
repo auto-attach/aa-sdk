@@ -53,10 +53,38 @@ LIBS = \
 	-lpthread \
 	-lrt
 
+SRCDIRS = apps/engtest apps/lldp common/agent common/common common/stubs platform/posix platform/stubs transport/common transport/stubs
+SUBDIRS = $(SRCDIRS)
+CLEANDIRS = $(SRCDIRS)
 
-clean:
-	rm -f $(OUTPUT)
+
+.PHONY: subdirs $(SUBDIRS)
+     
+all: lldp subdirs posix
+
+subdirs: $(SUBDIRS)
+     
+$(SUBDIRS):
+	$(MAKE) -C $@ all
 
 posix:
 	$(CC) -o $(OUTPUT) $(OBJS) $(LIBS)
 
+# Rebuild the lldp vincent-bernat lldp from scratch.
+lldpnew: FORCE
+	/bin/bash -c 'cd lldp; ./autogen.sh; ./configure; make -j'
+
+lldp:   FORCE
+	/bin/bash -c 'cd lldp; make -j'
+
+clean: $(CLEANDIRS)
+	rm -f $(OUTPUT)
+	/bin/bash -c 'cd lldp; make clean'
+
+distclean: clean
+	/bin/bash -c 'cd lldp; make distclean'
+
+
+
+
+FORCE:

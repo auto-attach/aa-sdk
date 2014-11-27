@@ -33,6 +33,8 @@ CPPFLAGS = -I. -I../../common/common \
 clean:
 	rm -f $(OBJS)
 
+all: posix
+
 posix: $(OBJS)
 
 $(OBJS) : %.o: %.c
