@@ -237,3 +237,38 @@ aasdku_errno_string(int errno)
 
     return perrno_string;
 }
+
+/* Convert an array of up to 4 bytes to a 32-bit integer. 
+ */
+uint32_t
+array_to_int(uint8_t *array, size_t len)
+{
+    uint32_t res = 0;
+    unsigned int i = 0;
+
+    if (len > 4) {
+        len = 4;
+    }
+
+    for (i = 0; i < len; i++) {
+        res = res | (array[len - i - 1] << (i * 8));
+    }
+
+    return res;
+}
+
+/* Convert a 32-bit integer to an array of up to 4 bytes.
+ */
+void
+int_to_array(uint8_t *array, size_t len, uint32_t value)
+{
+    unsigned int i;
+
+    if (len > 4) {
+        len = 4;
+    }
+
+    for (i = 0; i < len; i++) {
+        array[len - i - 1] = value >> (8 * i);
+    }
+}

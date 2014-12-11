@@ -82,7 +82,7 @@ enum {
 
 enum {
     AA_SDK_ISID_VLAN_ASGN_UNKNOWN = 0,
-    AA_SDK_ISIS_VLAN_ASGN_PENDING,
+    AA_SDK_ISID_VLAN_ASGN_PENDING,
     AA_SDK_ISID_VLAN_ASGN_ACTIVE,
     AA_SDK_ISID_VLAN_ASGN_REJECT,
 
@@ -132,10 +132,17 @@ int aasdki_ports_status_get(size_t  max_num_ports,
                             size_t *act_num_ports,
                             aasdk_port_status_t *pportsts);
 
+/* single assignment on a single port */
 int aasdki_asgn_status_get( aasdk_port_id_t port_id,
                             uint32_t isid,
                             uint16_t vlan,
                             aasdk_asgn_status_t *pasgnsts);
+/* all assignments on a single port */
+int aasdki_port_asgns_status_get(aasdk_port_id_t port_id,
+                                 size_t  max_num_asgns,
+                                 size_t *act_num_asgns,
+                                 aasdk_asgn_status_t *pasgnsts);
+/* all assignments on all ports */
 int aasdki_asgns_status_get(size_t  max_num_asgns,
                             size_t *act_num_asgns,
                             aasdk_asgn_status_t *pasgnsts);

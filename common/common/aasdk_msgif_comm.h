@@ -56,7 +56,7 @@ enum {
      * arg5 = chassis ID 8-9
      */
     AA_SDK_MSG_LLDP_BINDING_UPDATE = 9,
-    /* arg0 = port ID
+    /* arg0 = elem type | elem VLAN | port ID
      * arg1 = ISID
      * arg2 = VLAN
      * arg3 = origin

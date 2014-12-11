@@ -207,6 +207,9 @@ extern faRemoteIsidVlanAsgnsEntry_t *
 faRemoteIsidVlanAsgnFind (unsigned int ifIndex, unsigned int isid, unsigned int vlan, int searchType);
 
 extern int
+faRemoteIsidVlanAsgnPortFind (unsigned int ifIndex, faRemoteIsidVlanAsgnsEntry_t *pRemAsgnEnts, unsigned int *pRemAsgnCnt);
+
+extern int
 faRemoteIsidVlanAsgnCreate (faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgnData);
 
 extern int

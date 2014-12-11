@@ -1,5 +1,21 @@
 /* aa-sdk/common/agent/aa_agent.h */
 
+/*
+ * Copyright (c) 2014, Avaya Inc.
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
 #ifndef AA_AGENT_H
 #define AA_AGENT_H
 
@@ -129,6 +145,7 @@ typedef struct faMinIsidVlanBindingEntry_s
     unsigned short vlan;
     unsigned char  status;
     unsigned char  available1;
+    unsigned int   interface;
 
 } faMinIsidVlanBindingEntry_t;
 
@@ -347,8 +364,12 @@ extern aasdk_msgque_id_t faAgentMsgQ;
 #define FA_NO_RESET          FALSE
 #define FA_DISCOVERY         TRUE
 #define FA_NO_DISCOVERY      FALSE
-#define FA_ASSIGNMENT        FALSE
-#define FA_NO_ASSIGNMENT     TRUE
+#define FA_ASSIGNMENT        TRUE
+#define FA_NO_ASSIGNMENT     FALSE
+#define FA_REM_ASSIGNMENT    TRUE
+#define FA_NO_REM_ASSIGNMENT FALSE
+#define FA_LOC_ASSIGNMENT    FALSE
+#define FA_NO_LOC_ASSIGNMENT TRUE
 
 typedef struct faAgentStatsData_s {
 

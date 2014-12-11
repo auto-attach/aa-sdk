@@ -70,7 +70,7 @@ aasdkx_disc_sys_id_set(aasdk_port_id_t port_id,
 int
 aasdkx_asgn_data_set(aasdk_port_id_t port_id, int status,
                      uint32_t isid, uint16_t vlan,
-                     int origin, bool enable)
+                     bool enable)
 {
     return AA_SDK_ENONE;
 }

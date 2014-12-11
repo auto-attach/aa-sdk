@@ -50,9 +50,9 @@ aasdkx_port_data_ena_set(aasdk_port_id_t port_id, bool enable)
 int
 aasdkx_asgn_data_set(aasdk_port_id_t port_id, int status,
                      uint32_t isid, uint16_t vlan,
-                     int origin, bool enable)
+                     bool enable)
 {
-    return (aatransi_asgn_data_set(port_id, status, isid, vlan, origin, enable));
+    return (aatransi_asgn_data_set(port_id, status, isid, vlan, 0, enable));
 }
 
 

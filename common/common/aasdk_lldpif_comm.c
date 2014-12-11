@@ -1,4 +1,4 @@
-/* aa-sdk/platform/stubs/aasdk_lldpif_comm.c */
+/* aa-sdk/common/common/aasdk_lldpif_comm.c */
 
 /*
  * Copyright (c) 2014, Avaya Inc.
@@ -45,17 +45,6 @@ aasdki_port_data_ena(aasdk_port_id_t port_id)
 
 int
 aasdki_port_data_dis(aasdk_port_id_t port_id)
-{
-    return AA_SDK_ENONE;
-}
-
-
-/*
- * assignment data
- */
-int
-aasdki_asng_data_set(aasdk_port_id_t port_id, int status,
-                     uint32_t isid, uint16_t vlan)
 {
     return AA_SDK_ENONE;
 }

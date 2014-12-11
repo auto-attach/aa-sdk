@@ -77,6 +77,7 @@ clock_thread(void *arg)
     aasdku_time_add(&new_time, &cur_time, &one_sec);
 
     aasdki_time_tick(&new_time);
+    aatransi_time_tick(&new_time);
   }
 }
 

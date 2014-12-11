@@ -540,6 +540,9 @@ faAgent_main_proc(aasdk_msg_t *pmsg)
     aasdk_msg_t msg = *pmsg;
     unsigned short mgmtVlan;
     unsigned int   elemType;
+    faMinIsidVlanBindingEntry_t minAsgn;
+
+
     int rc = SUCCESS;
 
 
@@ -644,13 +647,6 @@ faAgent_main_proc(aasdk_msg_t *pmsg)
 	/* Ignore LLDP updates if the service is disabled */
 	if (! faAgentServiceEnabled())
 	{
-	    /* Free FA bindings list if necessary */
-	    if ((INRANGE(1, msg.arg1, FA_AGENT_MAX_ISID_VLAN_ASGNS)) && 
-		((void *)msg.arg2 != NULL))
-	    {
-		aasdkx_mem_free((void *)msg.arg2);
-	    }
-
 	    break;
 	}
 
@@ -658,25 +654,14 @@ faAgent_main_proc(aasdk_msg_t *pmsg)
         /* Ignore LLDP updates if the port is FA disabled */
 	if (! faAgentPortFaEnabled(msg.arg0 & 0x0000ffff))
 	{
-	    /* Free FA bindings list if necessary */
-	    if ((INRANGE(1, msg.arg1, FA_AGENT_MAX_ISID_VLAN_ASGNS)) && 
-		    ((void *)msg.arg2 != NULL))
-	    {
-	        aasdkx_mem_free((void *)msg.arg2);
-	    }
-
 	    break;
 	}
 
-	faUpdateRemoteIsidVlanAsgns(msg.arg0, msg.arg1, 
-					(faMinIsidVlanBindingEntry_t *)msg.arg2);
+	minAsgn.isid   = msg.arg1;
+	minAsgn.vlan   = msg.arg2;
+        minAsgn.status = msg.arg4;
 
-	/* Free FA bindings list if necessary */
-	if ((INRANGE(1, msg.arg1, FA_AGENT_MAX_ISID_VLAN_ASGNS)) && 
-	    ((void *)msg.arg2 != NULL))
-	{
-	    aasdkx_mem_free((void *)msg.arg2);
-	}
+        faUpdateRemoteIsidVlanAsgns(msg.arg0, 1, &minAsgn);
 
 	break;
 #endif /* def FA_ASSIGNMENT */
@@ -867,7 +852,7 @@ faLocalIsidVlanAsgnUpdateState (unsigned int isid,
                                 unsigned int update,
                                 unsigned char state)
 {
-#if FA_ASSIGNMENT
+#if FA_LOC_ASSIGNMENT
 
     faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
 
@@ -930,7 +915,7 @@ faLocalIsidVlanAsgnLexiOrder (unsigned int isidA,
 {
     int rc = 0;
 
-#if FA_ASSIGNMENT
+#if FA_LOC_ASSIGNMENT
 
     if (isidA < isidB)
         rc = FA_AGENT_LEXI_LT;
@@ -971,7 +956,6 @@ faLocalIsidVlanAsgnsClearAll (int notifyLldp)
 #if FA_ASSIGNMENT
 
     faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgn, *tmpFaIsidVlanAsgn;
-    LLDP_AVAYA_FA_ISID_VLAN_ASGNS_GROUP_T lldpFaIsidVlanAsgnData;
 
     faAgentErrorMsg(FA_AGENT_INFO_CALL_TRACE_1, FA_AGENT_INFO_MSG_4,
                     "faLocalIsidVlanAsgnsClearAll", notifyLldp, 0, 0, NULL);
@@ -980,17 +964,7 @@ faLocalIsidVlanAsgnsClearAll (int notifyLldp)
 
     if (notifyLldp == FA_NOTIFY_LLDP)
     {
-        memset(&lldpFaIsidVlanAsgnData, 0, sizeof(LLDP_AVAYA_FA_ISID_VLAN_ASGNS_GROUP_T));
 
-        if (GDS_lldp_data (LLDP_DEL, LLDP_AVAYA_FA_ISID_VLAN_ASGNS_GROUP, 
-                           &lldpFaIsidVlanAsgnData, sizeof(LLDP_AVAYA_FA_ISID_VLAN_ASGNS_GROUP_T)) != LLDP_OK)
-        {
-            faAgentErrorMsg(FA_AGENT_INFO_LLDP_DELETE, FA_AGENT_INFO_MSG_1, 0, 0, 0, 0, NULL);
-        }
-        else
-        {
-            faAgentErrorMsg(FA_AGENT_INFO_LOCAL_DELETE, FA_AGENT_INFO_MSG_2, 0, 0, 0, 0, NULL);
-        }
     }
 
     if ((faAgentConfigData.faLocalIsidVlanAsgnsTable == NULL) ||
@@ -1046,7 +1020,7 @@ faLocalIsidVlanAsgnFind (unsigned int isid,
 
     faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgn = NULL;
 
-#if FA_ASSIGNMENT
+#if FA_LOC_ASSIGNMENT
     int rc;
 
 
@@ -1079,6 +1053,9 @@ faLocalIsidVlanAsgnFind (unsigned int isid,
     return (faIsidVlanAsgn);
 }
 
+
+
+
 /**************************************************************
  * Name: faLocalIsidVlanAsgnAdd
  * Description:
@@ -1096,7 +1073,7 @@ faLocalIsidVlanAsgnFind (unsigned int isid,
 unsigned int
 faLocalIsidVlanAsgnAdd (faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgnData)
 {
-#if FA_ASSIGNMENT
+#if FA_LOC_ASSIGNMENT
 
     int rc;
     faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
@@ -1202,7 +1179,7 @@ faLocalIsidVlanAsgnDelete (faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgnData,
                            int notifyLldp)
 {
     int rc = 0;
-#if FA_ASSIGNMENT
+#if FA_LOC_ASSIGNMENT
 
     faLocalIsidVlanAsgnsEntry_t tmpFaIsidVlanAsgn;
     faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
@@ -1310,7 +1287,7 @@ faLocalIsidVlanAsgnDelete (faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgnData,
 void
 faLocalIsidVlanAsgnDump ()
 {
-#if FA_ASSIGNMENT
+#if FA_LOC_ASSIGNMENT
     char buffer[16];
     faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
 
@@ -1419,7 +1396,7 @@ faLocalIsidVlanAsgnDump ()
 faIsidVlanAsgnStates
 faLocalIsidVlanAsgnValidate (faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgnData)
 {
-#if FA_ASSIGNMENT
+#if FA_LOC_ASSIGNMENT
 
     if (faIsidVlanAsgnData == NULL)
     {
@@ -1468,7 +1445,7 @@ faLocalIsidVlanAsgnCreate (faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgnData,
 {
     int rc = 0;
 
-#if FA_ASSIGNMENT
+#if FA_LOC_ASSIGNMENT
 
     faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
 
@@ -1547,7 +1524,7 @@ faLocalIsidVlanAsgnUpdate (faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgnData)
 {
     int rc = 0;
 
-#if FA_ASSIGNMENT
+#if FA_LOC_ASSIGNMENT
 
     faAgentErrorMsg(FA_AGENT_INFO_CALL_TRACE_0, FA_AGENT_INFO_MSG_4,
                     "faLocalIsidVlanAsgnUpdate", 0, 0, 0, NULL);
@@ -1580,7 +1557,7 @@ void
 faLocalIsidVlanAsgnSync (int syncState,
                          int clearLldpData)
 {
-#if FA_ASSIGNMENT
+#if FA_LOC_ASSIGNMENT
 
     int failureSeen = 0;
     faLocalIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
@@ -1697,7 +1674,7 @@ faRemoteIsidVlanAsgnsClearAll (int notifyLldp)
 {
     int count = 0;
 
-#if FA_ASSIGNMENT
+#if FA_LOC_ASSIGNMENT
 
     faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgn, *tmpFaIsidVlanAsgn;
     LLDP_AVAYA_FA_ISID_VLAN_ASGNS_GROUP_T lldpFaIsidVlanAsgnData;
@@ -1739,9 +1716,6 @@ faRemoteIsidVlanAsgnsClearAll (int notifyLldp)
 
     aasdkx_mutex_unlock(faAgentMut);
 
-    faAgentDistributeData(FA_AGENT_MSG_REMOTE_ASGN_DATA, 
-                          FA_AGENT_MSG_SUB_DELETE_ALL,
-                          0, 0, 0, NULL);
 #endif
 
     return (count);
@@ -1763,7 +1737,7 @@ void
 faRemoteIsidVlanAsgnsClearLldpData ()
 {
 
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
 
     if (faAgentConfigData.faElementType == FA_AGENT_ELEMENT_HOST)
     {
@@ -1801,7 +1775,7 @@ faRemoteIsidVlanAsgnFind (unsigned int ifIndex,
 {
 
     faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgn = NULL;
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
     int rc;
 
     /* Traverse the list of ifIndex/I-SID/VLAN asgns looking for the target */
@@ -1833,6 +1807,64 @@ faRemoteIsidVlanAsgnFind (unsigned int ifIndex,
     return (faIsidVlanAsgn);
 }
 
+
+/**************************************************************
+ * Name: faRemoteIsidVlanAsgnPortFind
+ * Description:
+ *    Traverses the list of remote I-SID/VLAN assignments looking
+ *    for a match based on the provided ifIndex value
+ * Input Parameters:
+ *    ifIndex - target ifIndex value
+ *    pRemAsgnEnts - storage for matching entries
+ * Output Parameters:
+ *    pRemAsgCnt - number of entries found
+ *    none
+ * Return Values:
+ *    0 - no entries found
+ *    1 - entries found
+ *    
+ **************************************************************/
+
+int
+faRemoteIsidVlanAsgnPortFind (unsigned int ifIndex,
+                              faRemoteIsidVlanAsgnsEntry_t *pRemAsgnEnts,
+                              unsigned int *pRemAsgnCnt)
+{
+    int faRc = 0;
+
+    *pRemAsgnCnt = 0;
+
+#if FA_REM_ASSIGNMENT
+    faRemoteIsidVlanAsgnsEntry_t *faRemIsidVlanAsgn = NULL;
+    unsigned                      faRemIsidVlanAsgnPortCnt = 0;
+
+    /* Traverse the list of ifIndex/I-SID/VLAN asgns looking for the target */
+    if (faAgentConfigData.faRemoteIsidVlanAsgnsCount)
+    {
+        faRemIsidVlanAsgn = faAgentConfigData.faRemoteIsidVlanAsgnsTable;
+        while ((faRemIsidVlanAsgn != NULL) &&
+               (*pRemAsgnCnt < FA_AGENT_MAX_ISID_VLAN_ASGNS) &&
+               (faRemIsidVlanAsgnPortCnt <
+                faAgentConfigData.faRemoteIsidVlanAsgnsCount))
+        {
+	    if (faRemIsidVlanAsgn->ifIndex == ifIndex)
+	    {
+	        *pRemAsgnEnts = *faRemIsidVlanAsgn;
+		 pRemAsgnEnts++;
+		*pRemAsgnCnt += 1;
+                 faRc = 1;
+            };
+            faRemIsidVlanAsgnPortCnt++;
+            faRemIsidVlanAsgn = faRemIsidVlanAsgn->next;
+        }
+    }
+#endif
+
+    return (faRc);
+}
+
+
+
 /**************************************************************
  * Name: faRemoteIsidVlanAsgnAdd
  * Description:
@@ -1851,7 +1883,7 @@ faRemoteIsidVlanAsgnFind (unsigned int ifIndex,
 unsigned int
 faRemoteIsidVlanAsgnAdd (faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgnData)
 {
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
 
     int rc, maxCount;
     faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
@@ -1962,10 +1994,9 @@ faRemoteIsidVlanAsgnDelete (faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgnData,
                             int notifyLldp)
 {
     int rc = 0;
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
 
     faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
-    LLDP_AVAYA_FA_ISID_VLAN_ASGNS_GROUP_T lldpFaIsidVlanAsgnData;
 
     faAgentErrorMsg(FA_AGENT_INFO_CALL_TRACE_1, FA_AGENT_INFO_MSG_4,
                     "faRemoteIsidVlanAsgnDelete", notifyLldp, 0, 0, NULL);
@@ -2018,13 +2049,10 @@ faRemoteIsidVlanAsgnDelete (faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgnData,
         }
 
         faAgentErrorMsg(FA_AGENT_INFO_REMOTE_DELETE, FA_AGENT_INFO_MSG_2,
+                        "faRemoteIsidVlanAsgnDelete",
                         faIsidVlanAsgn->ifIndex, faIsidVlanAsgn->isid, 
-                        faIsidVlanAsgn->vlan, 0, NULL);
+                        faIsidVlanAsgn->vlan, NULL);
 
-        /* Sync data across units if neccessary */
-        faAgentDistributeData(FA_AGENT_MSG_REMOTE_ASGN_DATA,
-                              FA_AGENT_MSG_SUB_DELETE,
-                              0, 0, 0, (void *)faIsidVlanAsgn);
 
         aasdkx_mem_free(faIsidVlanAsgn);
 
@@ -2059,7 +2087,7 @@ faRemoteIsidVlanAsgnUpdate (faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgnData,
                             int distributeData)
 {
     int rc = 1;
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
 
     faAgentErrorMsg(FA_AGENT_INFO_CALL_TRACE_0, FA_AGENT_INFO_MSG_4,
                     "faRemoteIsidVlanAsgnUpdate", 0, 0, 0, NULL);
@@ -2100,7 +2128,7 @@ void
 faRemoteIsidVlanAsgnSync (int syncState,
                           int clearLldpData) 
 {
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
     int failureSeen = 0;
     faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
 
@@ -2138,7 +2166,7 @@ faRemoteIsidVlanAsgnSync (int syncState,
     {
         faAgentErrorMsg(FA_AGENT_INFO_LLDP_ADD, FA_AGENT_INFO_MSG_1, 0, 0, 0, 0, NULL);
     }
-#endif /* FA_ASSIGNMENT */
+#endif /* FA_REM_ASSIGNMENT */
     return;
 }
 
@@ -2190,7 +2218,7 @@ faRemoteGetElemTypeString (unsigned int elemType,
 void
 faRemoteIsidVlanAsgnDump (int elementTypeStart, int elementTypeEnd)
 {
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
 
     char buffer[16];
     char buffer1[16];
@@ -2325,10 +2353,10 @@ faRemoteIsidVlanAsgnDump (int elementTypeStart, int elementTypeEnd)
 faIsidVlanAsgnStates
 faRemoteIsidVlanAsgnValidate (faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgnData)
 {
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
 
     int maxCount;
-    Q_VLAN_INFO_t vinfo;
+
 
     if (faIsidVlanAsgnData == NULL)
     {
@@ -2382,7 +2410,7 @@ int
 faRemoteIsidVlanAsgnCreate (faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgnData)
 {
     int rc = 0;
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
     int maxCount;
     faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
 
@@ -2461,12 +2489,12 @@ faUpdateRemoteIsidVlanAsgns (unsigned int updateData,
                              unsigned int faBindingCount,
                              faMinIsidVlanBindingEntry_t *faBindingList)
 {
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
 
     int count = 0;
     int activeCount = 0;
     faIsidVlanAsgnStates asgnState;
-    LLDP_AVAYA_FA_ISID_VLAN_ASGNS_GROUP_T faIsidVlanAsgn;
+    faMinIsidVlanBindingEntry_t faIsidVlanAsgn;
 
     unsigned short interface;
     unsigned short elemType;
@@ -2488,6 +2516,9 @@ faUpdateRemoteIsidVlanAsgns (unsigned int updateData,
         /* state machine should be executed */
         if (faAgentConfigData.faElementType == FA_AGENT_ELEMENT_HOST)
         {
+
+#ifdef FA_AGENT_HOST_PROXY_SUPPORT
+
             if (! count)
             {
                 faAgentErrorMsg(FA_AGENT_INFO_CALL_TRACE_1, FA_AGENT_INFO_MSG_4,
@@ -2499,6 +2530,8 @@ faUpdateRemoteIsidVlanAsgns (unsigned int updateData,
                                     faIsidVlanAsgn.vlan,
                                     faIsidVlanAsgn.status,
                                     elemType, elemVlan);
+#endif
+
         }
         else if (faAgentConfigData.faElementType == FA_AGENT_ELEMENT_SERVER)
         {
@@ -2625,7 +2658,7 @@ faRemoteIsidVlanAsgnUpdateState (unsigned int interface,
                                  unsigned int update,
                                  unsigned char state)
 {
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
 
     faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
 
@@ -2688,7 +2721,7 @@ faRemoteIsidVlanAsgnVlanSource (unsigned int vlan)
 {
     int rc = 0;
 
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
 
     faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgn = NULL;
 
@@ -3300,6 +3333,7 @@ faNotifyApps (int currentEvent)
 
 
   
+
 
 
 

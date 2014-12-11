@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "string.h" /* mem*() */
+#include <string.h> /* mem*() */
+#include <stdio.h>  /* sprintf() */
 
 #include "aa_types.h"
 #include "aa_defs.h"
@@ -24,7 +25,9 @@
 #include "aa_agent_private.h"
 #include "aa_sysdefs.h"
 
+#include "aasdk_errno.h"
 #include "aasdk_osif_comm.h"
+#include "aasdk_lldpif_comm.h"
 
 /* Workspace */
 static faRemoteIsidVlanAsgnsEntry_t faRemIsidVlanAsgnList[FA_AGENT_REM_MAX_ISID_VLAN_ASGNS];
@@ -164,6 +167,9 @@ faAgentPerformRemoteListMaintenance (unsigned int expiration,
                             faIsidVlanAsgn->isid, 
                             faIsidVlanAsgn->vlan,
                             NULL);
+
+            aaPortStatInc(faIsidVlanAsgn->ifIndex,
+                          offsetof(aasdk_stats_data_t, aasdk_asgn_expired));
 
             /* Store elements for later processing */
             if (elemCount < FA_AGENT_REM_MAX_ISID_VLAN_ASGNS)
@@ -488,18 +494,15 @@ int
 faServerAsgnAcceptanceProcessing (faRemoteIsidVlanAsgnsEntry_t *faRemIsidVlanAsgn)
 {
     int rc = 0;
-#if FA_ASSIGNMENT
-    char vlanStr[32];
-    char portStr[32];
-    unsigned int unit = 0, port = 0;
-    int vlanCreated = 0, portMembershipUpdated = 0;
-    int switchedUniCreated = 0, portPvidUpdated = 0;
+#if FA_REM_ASSIGNMENT
+    int aa_rc = AA_SDK_ENONE;
 
     faAgentErrorMsg(FA_AGENT_INFO_CALL_TRACE_0, FA_AGENT_INFO_MSG_4,
                     "faServerAsgnAcceptanceProcessing", 0, 0, 0, NULL);
 
     if (faRemIsidVlanAsgn == NULL)
     {
+        rc = 0;
         goto faServerAsgnAcceptanceProcessingRet;
     }
 
@@ -507,16 +510,60 @@ faServerAsgnAcceptanceProcessing (faRemoteIsidVlanAsgnsEntry_t *faRemIsidVlanAsg
     /* should be rejected by default */
     if (faAgentConfigData.faAgentTemporaryState & FA_AGENT_TEMP_STATE_REJECT_ALL)
     {
+        faRemIsidVlanAsgn->status = FA_AGENT_ISID_VLAN_ASGN_REJECTED;
+        rc = 0;
         goto faServerAsgnAcceptanceProcessingRet;
     }
     
     /* Update remote asgn status */
-    faRemIsidVlanAsgn->status = FA_AGENT_ISID_VLAN_ASGN_ACTIVE;
-    faRemoteIsidVlanAsgnUpdate(faRemIsidVlanAsgn, FA_DISTRIBUTE);
-#endif /* FA_ASSIGNMENT */
-    rc = 1;
 
+#ifdef SYSDEF_INCLUDE_SPBM
+
+
+
+
+
+#endif
+
+    if (aa_rc == AA_SDK_ENONE)
+    {
+        faRemIsidVlanAsgn->status = FA_AGENT_ISID_VLAN_ASGN_ACTIVE;
+        rc = 1;
+    }
+    else
+    {
+        faRemIsidVlanAsgn->status = FA_AGENT_ISID_VLAN_ASGN_REJECTED;
+        rc = 0;
+    }
+
+    /* send the asgn status to the remote element */
+
+    aa_rc = aasdkx_asgn_data_set(faRemIsidVlanAsgn->ifIndex,
+                                 faRemIsidVlanAsgn->status,
+                                 faRemIsidVlanAsgn->isid,
+                                 faRemIsidVlanAsgn->vlan,
+                                 true);
+
+    /* cleanup if necessary */
+
+    if ((aa_rc != AA_SDK_ENONE) &&
+        (faRemIsidVlanAsgn->status == FA_AGENT_ISID_VLAN_ASGN_ACTIVE))
+    {
+#ifdef SYSDEF_INCLUDE_SPBM
+
+
+
+#endif
+        faRemIsidVlanAsgn->status = FA_AGENT_ISID_VLAN_ASGN_REJECTED;
+        rc = 0;
+    }
+        
+    faRemoteIsidVlanAsgnUpdate(faRemIsidVlanAsgn, FA_DISTRIBUTE);
+                                 
 faServerAsgnAcceptanceProcessingRet:
+#else
+    rc = 1;
+#endif
 
     return (rc);
 }
@@ -545,12 +592,11 @@ faServerAsgnRejectionExternalAppAccess (faRemoteIsidVlanAsgnsEntry_t *faRemIsidV
 {
     int rc = 0;
 
-#if FA_ASSIGNMENT
+#if FA_REM_ASSIGNMENT
     int failureSeen = 0;
     char vlanStr[32];
     char portStr[32];
     int tmpUnit, vlanMembersPresent = 0;
-    port_mask_t portMask[NSX_MAX_MODULES + 1];
 
     if (faRemIsidVlanAsgn == NULL)
     {
@@ -564,18 +610,12 @@ faServerAsgnRejectionExternalAppAccess (faRemoteIsidVlanAsgnsEntry_t *faRemIsidV
     {
         sprintf(vlanStr, "%d", faRemIsidVlanAsgn->vlan);
     
-        if (SMGR_inStack())
-        {
-            sprintf(portStr, "%d/%d", unit, port);
-        }
-        else
-        {
-            unit = 0;
-            sprintf(portStr, "%d", port);
-        }
+        unit = 0;
+        sprintf(portStr, "%d", port);
     }
 
 #ifdef SYSDEF_INCLUDE_SPBM
+
 
 
 
@@ -606,19 +646,6 @@ faServerAsgnRejectionExternalAppAccess (faRemoteIsidVlanAsgnsEntry_t *faRemIsidV
     if ((FA_AGENT_ACTUAL_IFC(faRemIsidVlanAsgn->ifIndex)) &&
         (faRemIsidVlanAsgn->components & FA_COMP_PORT_PVID))
     {
-        if (configvlanportsInternal(INT_CFG_VLAN_PORTS_OP_Pvid, portStr, 
-                                    Q_DEFAULT_PVID, NULL) == SUCCESS)
-        {
-            /* Update entry components state for later use */
-            faRemIsidVlanAsgn->components &= ~FA_COMP_PORT_PVID; 
-        }
-        else
-        {
-            faAgentErrorMsg(FA_AGENT_ERR_ASGN_REJT_PVID, FA_AGENT_INFO_MSG_1,
-                            0, 0, 0, 0, NULL);
-
-            failureSeen = 1;
-        }
     }
 
 #ifdef SYSDEF_INCLUDE_FA_SMLT
@@ -641,30 +668,6 @@ faServerAsgnRejectionExternalAppAccess (faRemoteIsidVlanAsgnsEntry_t *faRemIsidV
 
 #endif /* SYSDEF_INCLUDE_FA_SMLT */
 
-        memset(&portMask, 0, (sizeof(port_mask_t) * (NSX_MAX_MODULES + 1)));
-        if (q_VlanGetPortMask(faRemIsidVlanAsgn->vlan, (LONG *)&portMask) == Q_E_SUCCESS)
-        {
-            /* Are there still VLAN members? */
-            for (tmpUnit = 0; tmpUnit < (NSX_MAX_MODULES + 1); tmpUnit++)
-            {
-                if (isAnyPortInMap(&portMask[tmpUnit]))
-                {
-                    vlanMembersPresent = 1;
-                    break;
-                }
-            }
-
-            if (! vlanMembersPresent)
-            {
-                if (configvlandeleteInternal(faRemIsidVlanAsgn->vlan) == FAIL)
-                {
-                    faAgentErrorMsg(FA_AGENT_ERR_ASGN_REJT_VLAN, FA_AGENT_INFO_MSG_1,
-                                    0, 0, 0, 0, NULL);
-
-                    failureSeen = 1;
-                }
-            }
-        }
     }
 
     if (! failureSeen)
@@ -672,7 +675,7 @@ faServerAsgnRejectionExternalAppAccess (faRemoteIsidVlanAsgnsEntry_t *faRemIsidV
         rc = 1;
     }
 
-#endif /* FA_ASSIGNMENT */
+#endif /* FA_REM_ASSIGNMENT */
 
     return (rc);
 }
@@ -717,7 +720,7 @@ faServerAsgnRejectionProcessing (faRemoteIsidVlanAsgnsEntry_t *faRemIsidVlanAsgn
     /* proceed accordingly */
     if (FA_AGENT_ACTUAL_IFC(faRemIsidVlanAsgn->ifIndex))
     {
-        if (faRemIsidVlanAsgn->ifIndex != port))
+        if (faRemIsidVlanAsgn->ifIndex != port)
         {
             goto faServerAsgnRejectionProcessingRet;
         }
@@ -741,6 +744,18 @@ faServerAsgnRejectionProcessing (faRemoteIsidVlanAsgnsEntry_t *faRemIsidVlanAsgn
     /* Update remote asgn status */
     faRemIsidVlanAsgn->components = FA_COMP_NONE;
     faRemIsidVlanAsgn->status = rejectionStatus;
+
+    aasdkx_asgn_data_set(faRemIsidVlanAsgn->ifIndex,
+                         faRemIsidVlanAsgn->status,
+                         faRemIsidVlanAsgn->isid,
+                         faRemIsidVlanAsgn->vlan,
+                         false);
+
+#ifdef SYSDEF_INCLUDE_SPBM                         
+
+
+
+#endif
 
     faRemoteIsidVlanAsgnUpdate(faRemIsidVlanAsgn, FA_DISTRIBUTE);
 
@@ -875,6 +890,8 @@ faServerProcessRemoteElem (unsigned int interface,
             /* is notified about the rejection */
             tmpFaIsidVlanAsgn.status = asgnState; 
             faRemoteIsidVlanAsgnUpdate(&tmpFaIsidVlanAsgn, FA_NO_DISTRIBUTE);
+            aaPortStatInc(tmpFaIsidVlanAsgn.ifIndex,
+                          offsetof(aasdk_stats_data_t, aasdk_asgn_rejected));
 
             goto faServerProcessRemoteElemRet;
         }
@@ -907,6 +924,9 @@ faServerProcessRemoteElem (unsigned int interface,
                             NULL, interface, isid, vlan, NULL);
    
             asgnState = FA_AGENT_ISID_VLAN_ASGN_ACTIVE;
+
+            aaPortStatInc(tmpFaIsidVlanAsgn.ifIndex,
+                           offsetof(aasdk_stats_data_t, aasdk_asgn_accepted));
             saveToNv = 1;
         }
         else
@@ -1027,7 +1047,7 @@ faServerAsgnReset (int notifyLldp)
     if (asgnIssues)
     {
         faAgentErrorMsg(FA_AGENT_ERR_ASGN_RESET_ISSUE, FA_AGENT_INFO_MSG_1,
-                        asgnIssues, 0, 0, 0, NULL);
+                        "faServerAsgnReset", asgnIssues, 0, 0, NULL);
 
         faAgentStatsData.faAgentServerCleanupIssues += asgnIssues;
     }
@@ -1177,8 +1197,8 @@ faServerProcessSmltPeerRemoteResp (unsigned int interface,
 
 
 
-
-
+ 
+ 
 
 
 

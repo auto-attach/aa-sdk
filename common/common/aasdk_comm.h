@@ -20,6 +20,7 @@
 #define AASDK_COMM_H
 
 #include <stdint.h>
+#include <stddef.h>  /* size_t */
 
 /* opaque port identifier */
 typedef uint32_t aasdk_port_id_t;
@@ -52,6 +53,11 @@ extern unsigned int        aasdk_output_flags;
 extern aasdk_output_func_t aasdk_output_func;
 
 int aasdk_output(char *output_string, unsigned int output_flag_num);
+
+/* array and integer conversions */
+uint32_t array_to_int(uint8_t *array, size_t len);
+void int_to_array(uint8_t *array, size_t len, uint32_t value);
+
 
 #endif /* ndef AASDK_COMM_H */
 
