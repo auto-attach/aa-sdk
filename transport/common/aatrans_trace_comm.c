@@ -34,6 +34,7 @@ aasdk_trc_mod_t aasdk_trc_mod_list[aasdk_mod_max] = {
     {aasdk_mod_aatrans_packet,  "aatrans_packet",   aa_none},
     {aasdk_mod_aatrans_elem,    "aatrans_elem",     aa_none},
     {aasdk_mod_aatrans_auth,    "aatrans_auth",     aa_none},
+    {aasdk_mod_lldp_debug,      "lldp_debug",       aa_none},
 };
 
 void aasdku_report(aasdk_trc_mod_id_t mod_id, const char *file, uint32_t line, 
@@ -58,6 +59,9 @@ void aasdku_report(aasdk_trc_mod_id_t mod_id, const char *file, uint32_t line,
     charsPrinted = vsnprintf(pBuf, AA_TRACE_MAX_LINE_LENGTH-1-prefix_len, format, args); /* this excludes '\0' */
     va_end(args);
 
-    (*aasdk_output_func)(buf);
+    if(aasdk_output_func) {
+        (*aasdk_output_func)(buf);
+        (*aasdk_output_func)("\n");
+    }
 }
 

@@ -23,14 +23,13 @@
 #include "aatrans_comm.h"
 #include "aatrans_port_comm.h"
 #include "aatrans_trace_comm.h"
+#include "aatrans_time_comm.h"
 
 #define AASDK_TRC_MOD_ID aasdk_mod_aatrans_common
 
 /* lldp global config */
 struct lldpd *lldp_cfg = NULL;
 lldp_cfg_ext_t cfg_ext;
-
-#define cfg lldp_cfg
 
 #define MAX_ETHER_ADDR_LEN_IN_BYTE	6
 #define MAX_ETHER_ADDR_LEN_IN_WORD	3
@@ -67,6 +66,8 @@ aatransi_global_init(aasdk_transport_config_t *config)
     cfg->g_config.c_max_neighbors = config->max_neighbors;
     cfg->g_config.c_advertise_version = config->advertise_version;
     lldpd_assign_cfg_to_protocols(cfg);
+    aatransi_time_interval_set(config->tx_interval);
+
 // The following need not be exposed, keep them here for now
 //    cfg->g_config.c_mgmt_pattern = mgmtp;
 //    cfg->g_config.c_cid_pattern = cidp;
@@ -151,6 +152,7 @@ aatransi_tx_interval_set(uint32_t value)
 
         cfg->g_config.c_tx_interval = value;
         lchassis->c_ttl = cfg->g_config.c_tx_interval * cfg->g_config.c_tx_hold;
+        aatransi_time_interval_set(value);
     }
 
     return AA_SDK_ENONE;

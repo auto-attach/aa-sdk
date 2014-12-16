@@ -101,10 +101,9 @@ int aatransi_notification_interval_get(uint32_t *ret_val);
 int aatransi_chassis_macaddr_set(uint8_t *macaddr);
 int aatransi_mtu_set(uint32_t mtu);
 int aatransi_send_pdu();
-int aatransi_time_tick(void);
 int aatransi_asgn_data_set(aasdk_port_id_t port_id, int status,
                            uint32_t isid, uint16_t vlan,
-                           int origin, bool enable);
+                           bool enable);
 int aatransi_disc_elem_type_set(int elem_type);
 int aatransi_disc_mgmt_vlan_set(uint16_t mgmt_vlan);
 int aatransi_disc_sys_id_set(aasdk_port_id_t port_id, uint8_t *sys_id);
@@ -117,7 +116,6 @@ int aatransx_auth_ena_set(aasdk_port_id_t port_id, bool enable);
 
 void aatransi_print_lldp_and_aa_stats(print_func_t print_func, void *arg);
 void aatransi_print_element_status(print_func_t print_func, void *arg);
-void aatransi_print_isid_status(print_func_t print_func, void *arg);
 
 
 #endif /* AATRANS_COMM_H */

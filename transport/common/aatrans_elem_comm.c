@@ -22,24 +22,181 @@
 #include "aasdk_errno.h"
 #include "aatrans_comm.h"
 #include "aatrans_trace_comm.h"
-//#include "aasdk_plat/aasdk_lldpif_plat.h"
 
 #define AASDK_TRC_MOD_ID aasdk_mod_aatrans_elem
 
-static struct lldp_aa_element_system_id system_id_null;
+
+int
+aatrans_asgn_data_set(aasdk_port_id_t port_id, int status,
+                     uint32_t isid, uint16_t vlan,
+		     bool enable, bool local)
+{
+    struct lldpd_hardware *hardware;
+    struct lldpd_aa_isid_vlan_maps_tlv *isid_vlan_map = NULL;
+    struct lldpd_port *port = NULL;
+    struct lldpd_port *rport = NULL;
+    uint32_t map_isid = 0;
+    bool found = false;
+
+    aasdk_trace(aa_verbose, 
+                "port_id=%d status=%d isid=%d vlan=%d enable=%d", 
+                port_id, status, isid, vlan, enable);
+
+    TAILQ_FOREACH(hardware, &cfg->g_hardware, h_entries) {
+        if (hardware->h_ifindex == port_id)
+        {      
+            /* local port */
+            if (local) {
+                port = &hardware->h_lport;
+                bool found = false;
+                
+                /* search the list for an existing mapping */
+                TAILQ_FOREACH(isid_vlan_map, &port->p_isid_vlan_maps, m_entries) {
+                    map_isid = array_to_int(isid_vlan_map->isid_vlan_data.isid, 
+                                            sizeof(isid_vlan_map->isid_vlan_data.isid)); 
+                    if ((map_isid == isid) && 
+                        (isid_vlan_map->isid_vlan_data.vlan == vlan)) {
+                        aasdk_trace(aa_verbose, 
+                                    "match found for port_id=%d isid=%d vlan=%d",
+                                    port_id, isid, vlan);
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (enable) {
+                    /* if not found add mapping */
+                    if (!found) {
+                        if ((isid_vlan_map = (struct lldpd_aa_isid_vlan_maps_tlv *) 
+                             calloc(1, sizeof(struct lldpd_aa_isid_vlan_maps_tlv)))
+                            == NULL ) {
+                            aasdk_log("Error: unable to allocate memory for aa_isid_vlan_maps_tlv struct");
+                            return AA_SDK_ENOMEM;
+                        }
+                        /* vlan is last 12 bits */
+                        isid_vlan_map->isid_vlan_data.vlan = vlan & 0x0FFF;
+                        
+                        /* isid is 24 bits */
+                        int_to_array(isid_vlan_map->isid_vlan_data.isid, 
+                                     sizeof(isid_vlan_map->isid_vlan_data.isid), isid);
+                        
+                        /* status is first 4 most-significant bits */
+                        isid_vlan_map->isid_vlan_data.status = status & 0x000F;
+                        
+                        aasdk_trace(aa_verbose,
+                                    "Adding mapping isid=%d vlan=%d status=%d to port_id %d",
+                                    isid, vlan, status, port_id);
+
+                        TAILQ_INSERT_TAIL(&port->p_isid_vlan_maps, isid_vlan_map, m_entries);
+                    }
+                    /* if found, just update the status */
+                    else {
+                        aasdk_trace(aa_verbose,
+                                    "Updating mapping isid=%d vlan=%d status=%d for port_id %d",
+                                    isid, vlan, status, port_id);
+                        
+                        /* status is first 4 most-significant bits */
+                        isid_vlan_map->isid_vlan_data.status = status & 0x000F;
+
+                    }
+
+                }
+                else {
+                    if (found) {
+                        aasdk_trace(aa_verbose,
+                                    "deleting mapping isid=%d vlan=%d from port_id %d",
+                                    isid, vlan, port_id);
+                        TAILQ_REMOVE(&port->p_isid_vlan_maps, isid_vlan_map, m_entries);
+                    }
+                    else {
+                        aasdk_log("Error: mapping isid=%d vlan=%d not found for port_id=%d",
+                                  isid, vlan, port_id);
+                        return AA_SDK_EINVAL;
+                    }
+                }
+
+                return AA_SDK_ENONE;
+
+            } /* if (local) */
+
+            /* remote port */
+            else {
+                TAILQ_FOREACH (rport, &hardware->h_rports, p_entries) {
+                
+                    /* search the list for an existing mapping */
+                    if ( !TAILQ_EMPTY(&rport->p_isid_vlan_maps) ) {
+                        TAILQ_FOREACH (isid_vlan_map, &rport->p_isid_vlan_maps, m_entries) {
+                            found = false;
+                            
+                            map_isid = array_to_int(isid_vlan_map->isid_vlan_data.isid, 
+                                                    sizeof(isid_vlan_map->isid_vlan_data.isid)); 
+                            if ((map_isid == isid) && 
+                                (isid_vlan_map->isid_vlan_data.vlan == vlan)) {
+                                aasdk_trace(aa_verbose, 
+                                            "match found for port_id=%d isid=%d vlan=%d",
+                                            port_id, isid, vlan);
+                                found = true;
+                                break;
+                            }
+                        }
+                        
+                        if (enable) {
+                            /* if not found, cannot add through this API return error */
+                            if (!found) {
+                                aasdk_log("Error: Remote mapping not found isid=%d vlan=%d status=%d for port_id %d",
+                                          isid, vlan, status, port_id);
+                                return AA_SDK_EINVAL;
+                            }
+                            /* if found, just update the status */
+                            else {
+                                aasdk_trace(aa_verbose,
+                                            "Updating mapping isid=%d vlan=%d status=%d for port_id %d",
+                                            isid, vlan, status, port_id);
+                                
+                                /* status is first 4 most-significant bits */
+                                isid_vlan_map->isid_vlan_data.status = status & 0x000F;
+                            }
+                        }
+                        else {
+                            if (found) {
+                                aasdk_trace(aa_verbose,
+                                            "deleting mapping isid=%d vlan=%d from port_id %d",
+                                            isid, vlan, port_id);
+                                TAILQ_REMOVE(&rport->p_isid_vlan_maps, isid_vlan_map, m_entries);
+                            }
+                            else {
+                                aasdk_log("Error: Unable to delete remote mapping isid=%d vlan=%d port_id=%d, not found",
+                                          isid, vlan, port_id);
+                                return AA_SDK_EINVAL;
+                            }
+                        }
+
+                        return AA_SDK_ENONE;
+
+                    } /* if ( !TAILQ_EMPTY(&rport->p_isid_vlan_maps) ) */
+                    
+                } /* TAILQ_FOREACH (rport, &hardware->h_rports, p_entries) */
+                
+            } /* remote */
+            
+            return AA_SDK_ENONE;
+
+        } /* if (hardware->h_ifindex == port_id) */
+        
+    } /* TAILQ_FOREACH(hardware, &cfg->g_hardware, h_entries) */
+
+    aasdk_trace(aa_terse, "Error: port_id %d not found!", port_id);
+
+    return AA_SDK_EINVAL;
+}
 
 int
 aatransi_asgn_data_set(aasdk_port_id_t port_id, int status,
                      uint32_t isid, uint16_t vlan,
-                     int origin, bool enable)
+		     bool enable)
 {
-    aasdk_trace(aa_verbose, 
-                "port_id=%d status=%d isid=%d vlan=%d origin=%d, enable=%d", 
-                port_id, status, isid, vlan, origin, enable);
-
-    return AA_SDK_ENONE;
+    return (aatrans_asgn_data_set(port_id, status, isid, vlan, enable, false));
 }
-
 
 int
 aatransi_disc_elem_type_set(int elem_type)
@@ -73,7 +230,6 @@ aatransi_disc_mgmt_vlan_set(uint16_t mgmt_vlan)
 
     return AA_SDK_ENONE;
 }
-
 
 int
 aatransi_disc_sys_id_set(aasdk_port_id_t port_id, uint8_t *sys_id)
@@ -129,78 +285,15 @@ aatransi_print_element_status(print_func_t print_func, void *arg)
 //
 //    return NULL;
 //}
+//
+//typedef enum {
+//    1,
+//    2,
+//    3,
+//    4
+//} array_size_t;
+//
 
-inline static uint32_t
-array_to_int(uint8_t *array, size_t len)
-{
-    uint32_t res = 0;
-    unsigned int i = 0;
 
-    for (i = 0; i < len; i++) {
-        res = res | (array[len - i - 1] << (i * 8));
-    }
 
-    return res;
-}
-
-void
-aatransi_print_isid_status(print_func_t print_func, void *arg)
-{
-    if(!print_func || !arg) {
-        return;
-    }
-
-    (print_func)(arg, "LLDP ISID-VLAN Mappings:\n");
-
-    if (cfg) {
-        struct lldpd_hardware *hardware;
-//        struct mapping_internal *m;
-
-        /* TODO Who enforces that the I-SID are unique per ports ?  This triple loop is wicked ... */
-        TAILQ_FOREACH (hardware, &cfg->g_hardware, h_entries) {
-            struct lldpd_port *port;
-
-            TAILQ_FOREACH (port, &hardware->h_rports, p_entries) {
-                struct lldpd_aa_isid_vlan_maps_tlv *mapping;
-
-                TAILQ_FOREACH (mapping, &port->p_isid_vlan_maps, m_entries) {
-                    uint32_t isid = array_to_int(mapping->isid_vlan_data.isid, 
-                        sizeof(mapping->isid_vlan_data.isid));
-//                    struct mapping_internal *m = mapping_find_by_isid(lldp, isid);
-
-                    aasdk_trace(aa_verbose, "h_rport: isid=%u, vlan=%u, status=%d", 
-                                isid, 
-                                mapping->isid_vlan_data.vlan,
-                                mapping->isid_vlan_data.status);
-
-                    /* Update the status of our internal state for the mapping */
-//                    if (m) {
-//                        aasdk_trace(aa_verbose, "setting status for ISID=%u to %u", 
-//                                 isid, 
-//                                 mapping->isid_vlan_data.status);
-//                        m->status = mapping->isid_vlan_data.status;
-//                    } else {
-//                        aasdk_log("Error: couldn't find mapping for I-SID=%u", isid);
-//                    }
-                }
-            }
-        }
-
-        (print_func)(arg, "%-8s %-4s %-11s %-8s\n", 
-                          "I-SID",
-                          "VLAN",
-                          "Source",
-                          "Status");
-        (print_func)(arg, "-------- ---- ----------- --------\n");
-
-//        HMAP_FOR_EACH (m, hmap_node, &lldp->mappings) {
-//            /* TODO Make more validation (for e.g. verify that VLAN is the same, etc.) */
-//            (print_func)(arg, "%-8ld %-4ld %-11s %-11s\n",
-//                              (long int) m->isid,
-//                              (long int) m->vlan,
-//                              "Switch",
-//                              fa_status_to_str(m->status));
-//        }
-    }
-}
 

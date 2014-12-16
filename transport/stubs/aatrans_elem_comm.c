@@ -26,11 +26,11 @@
 int
 aatransi_asgn_data_set(aasdk_port_id_t port_id, int status,
                      uint32_t isid, uint16_t vlan,
-                     int origin, bool enable)
+                     bool enable)
 {
     aasdk_trace(aa_verbose, 
-                "port_id=%d status=%d isid=%d vlan=%d origin=%d, enable=%d", 
-                port_id, status, isid, vlan, origin, enable);
+                "port_id=%d status=%d isid=%d vlan=%d enable=%d", 
+                port_id, status, isid, vlan, enable);
 
     return AA_SDK_ENONE;
 }

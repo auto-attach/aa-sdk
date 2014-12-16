@@ -52,7 +52,7 @@ aasdkx_asgn_data_set(aasdk_port_id_t port_id, int status,
                      uint32_t isid, uint16_t vlan,
                      bool enable)
 {
-    return (aatransi_asgn_data_set(port_id, status, isid, vlan, 0, enable));
+    return (aatransi_asgn_data_set(port_id, status, isid, vlan, enable));
 }
 
 

@@ -34,16 +34,16 @@ int
 aatransi_port_create(uint32_t port_id,
                      aasdk_transport_port_config_t *p_cfg,
                      uint32_t mtu, uint8_t *system_id, 
-                     uint8_t *iface_macaddr)
+                     uint8_t *if_macaddr)
 {
     struct lldpd_hardware *hardware;
     char ifname[2048]={0};
     char *p = ifname;
     uint32_t i;
 
-    if ((p_cfg == NULL) || (system_id == NULL) || (iface_macaddr == NULL)) {
+    if ((p_cfg == NULL) || (system_id == NULL) || (if_macaddr == NULL)) {
         aasdk_log("Error: null argument, %p %p %p", 
-                  p_cfg, system_id, iface_macaddr);
+                  p_cfg, system_id, if_macaddr);
         return AA_SDK_EINVAL;
     }
 
@@ -76,9 +76,12 @@ aatransi_port_create(uint32_t port_id,
     /* Auto Attach element tlv */
     hardware->h_lport.p_element.type = cfg_ext.aa_element_type;;
     hardware->h_lport.p_element.mgmt_vlan = cfg_ext.aa_element_mgmt_vlan;
-    memcpy(hardware->h_lladdr, iface_macaddr, AASDK_MAC_ADDR_LEN);
+    memcpy(hardware->h_lladdr, if_macaddr, AASDK_MAC_ADDR_LEN);
     memcpy(&hardware->h_lport.p_element.system_id, system_id, 
            AASDK_ELEMENT_SYSTEM_ID_LEN);
+
+//...TBD check to make sure the interface does not already exist prior to adding
+
     TAILQ_INIT(&hardware->h_lport.p_isid_vlan_maps);
     TAILQ_INSERT_TAIL(&cfg->g_hardware, hardware, h_entries);
     
@@ -142,12 +145,12 @@ int
 aatransi_port_data_get(uint32_t port_id,
                        aasdk_transport_port_config_t *p_cfg,
                        uint32_t *mtu, uint8_t *system_id, 
-                       uint8_t *iface_macaddr)
+                       uint8_t *if_macaddr)
 {
     struct lldpd_hardware *hardware;
 
     if ((p_cfg == NULL) | (mtu == NULL) || 
-        (system_id == NULL) || (iface_macaddr == NULL)) {
+        (system_id == NULL) || (if_macaddr == NULL)) {
         aasdk_log("Error: null argument(s)");
         return AA_SDK_EINVAL;
     }
@@ -165,7 +168,7 @@ aatransi_port_data_get(uint32_t port_id,
             /* Auto Attach element tlv */
             cfg_ext.aa_element_type = hardware->h_lport.p_element.type;
             cfg_ext.aa_element_mgmt_vlan = hardware->h_lport.p_element.mgmt_vlan;
-            memcpy(iface_macaddr, hardware->h_lladdr, AASDK_MAC_ADDR_LEN);
+            memcpy(if_macaddr, hardware->h_lladdr, AASDK_MAC_ADDR_LEN);
             memcpy(system_id, &hardware->h_lport.p_element.system_id,
                    AASDK_ELEMENT_SYSTEM_ID_LEN);
 
@@ -355,7 +358,8 @@ aatransi_port_data_ena_set(aasdk_port_id_t port_id, bool enable)
 
 /* caller is responsible for allocating and freeing the supplied data storage */
 int
-aatransi_port_neighbors_get(aasdk_port_id_t port_id, char *buf, uint32_t *retcount)
+aatransi_port_neighbors_get(aasdk_port_id_t port_id, char *buf, 
+                            uint32_t *retcount, int maxcount)
 {
     struct lldpd_hardware *hardware;
     struct lldpd_port *port;
@@ -375,32 +379,56 @@ aatransi_port_neighbors_get(aasdk_port_id_t port_id, char *buf, uint32_t *retcou
     TAILQ_FOREACH(hardware, &cfg->g_hardware, h_entries) {
         if (hardware->h_ifindex == port_id)
         {
+            int len = 0;
             neighbor = (aatrans_disc_neighbor_entry_t *) buf;
             
             /* populate the buffer */
             TAILQ_FOREACH(port, &hardware->h_rports, p_entries) {
                 /* Chassis */
                 if (port->p_chassis->c_name) {
-                    memcpy(neighbor->chassis_name, port->p_chassis->c_name, strlen(port->p_chassis->c_name));
+                    len = strlen(port->p_chassis->c_name);
+                    if (len > AASDK_TLV_STRING_LEN_MAX) {
+                        len = AASDK_TLV_STRING_LEN_MAX - 1;
+                    }
+                    memcpy(neighbor->chassis_name, port->p_chassis->c_name, len);
+                    neighbor->chassis_name[AASDK_TLV_STRING_LEN_MAX-1] = '\0';
                 }
+                len = port->p_chassis->c_id_len;
                 if (port->p_chassis->c_id) {
-                    memcpy(neighbor->chassis_id, port->p_chassis->c_id, port->p_chassis->c_id_len);
+                    if (len > AASDK_TLV_VALUE_LEN_MAX) {
+                        len = AASDK_TLV_VALUE_LEN_MAX;
+                    }
+                    memcpy(neighbor->chassis_id, port->p_chassis->c_id, len);
                 }
                 neighbor->chassis_id_subtype = port->p_chassis->c_id_subtype;
-                neighbor->chassis_id_len = port->p_chassis->c_id_len;
+                neighbor->chassis_id_len = len;
                 neighbor->chassis_cap_supported = port->p_chassis->c_cap_available;
                 neighbor->chassis_cap_enabled = port->p_chassis->c_cap_enabled;
                 if (port->p_chassis->c_descr) {
-                    memcpy(neighbor->chassis_descr, port->p_chassis->c_descr, strlen(port->p_chassis->c_descr));
+                    int len = strlen(port->p_chassis->c_descr);
+                    if (len > AASDK_TLV_STRING_LEN_MAX) {
+                        len = AASDK_TLV_STRING_LEN_MAX - 1;
+                    }
+                    memcpy(neighbor->chassis_descr, port->p_chassis->c_descr, len);
+                    neighbor->chassis_descr[AASDK_TLV_STRING_LEN_MAX-1] = '\0';
                 }
                 /* Port */
+                len = port->p_id_len;
                 if (port->p_id) {
-                    memcpy(neighbor->port_id, port->p_id, port->p_id_len);
+                    if (len > AASDK_TLV_VALUE_LEN_MAX) {
+                        len = AASDK_TLV_VALUE_LEN_MAX;
+                    }
+                    memcpy(neighbor->port_id, port->p_id, len);
                 }
                 neighbor->port_id_subtype = port->p_id_subtype;
-                neighbor->port_id_len = port->p_id_len;
+                neighbor->port_id_len = len;
                 if (port->p_descr) {
-                    memcpy(neighbor->port_descr, port->p_descr, strlen(port->p_descr));
+                   len = strlen(port->p_descr);
+                    if (len > AASDK_TLV_STRING_LEN_MAX) {
+                        len = AASDK_TLV_STRING_LEN_MAX - 1;
+                    }
+                    memcpy(neighbor->port_descr, port->p_descr, len);
+                    neighbor->port_descr[AASDK_TLV_STRING_LEN_MAX-1] = '\0';
                 }
                 /* AA Element */
                 memcpy(neighbor->elem_system_id, &port->p_element.system_id, sizeof(port->p_element.system_id));
@@ -409,6 +437,10 @@ aatransi_port_neighbors_get(aasdk_port_id_t port_id, char *buf, uint32_t *retcou
 
                 neighbor++;
                 count++;
+                if ((count+1) == maxcount){
+                    aasdk_trace(aa_verbose, "aatransi_port_neighbors_get - return since max neighbors reached for port %d", port_id);
+                    break;
+                }
             }
 
             *retcount = count;

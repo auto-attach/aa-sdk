@@ -37,6 +37,7 @@ typedef enum {
     aasdk_mod_aatrans_packet,
     aasdk_mod_aatrans_elem,
     aasdk_mod_aatrans_auth,
+    aasdk_mod_lldp_debug,
     aasdk_mod_max               /* Last entry -- Do not add entries after this line! */
 } aasdk_trc_mod_id_t;
 

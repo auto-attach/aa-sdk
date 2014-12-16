@@ -18,6 +18,7 @@
 
 #include <time.h>
 
-void aatransi_time_tick(struct timespec *curr);
+void aatransi_time_interval_set(int interval);
+void aatransi_time_onesec_ticker(void);
 
 #endif /* AATRANS_TIME_COMM_H */

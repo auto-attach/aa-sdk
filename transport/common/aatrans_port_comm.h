@@ -61,15 +61,22 @@ typedef struct {
 int aatransi_ports_data_ena_set(bool enable);
 int aatransi_port_data_ena_set(aasdk_port_id_t port_id, bool enable);
 int aatransi_port_admin_get(uint32_t port_id);
+int aatransi_port_mtu_set(aasdk_port_id_t port_id, uint32_t value);
 int aatransi_notify_port_up(aasdk_port_id_t port_id);
 int aatransi_notify_port_down(aasdk_port_id_t port_id);
 int aatransi_port_stats_get(aasdk_port_id_t port_id, 
                                     aasdk_transport_port_stats_t *stats);
+int aatransi_port_data_get(uint32_t port_id,
+                           aasdk_transport_port_config_t *p_cfg,
+                           uint32_t *mtu, uint8_t *system_id, 
+                           uint8_t *if_macaddr);
+int aatransi_port_neighbors_get(aasdk_port_id_t port_id, char *buf, 
+                                uint32_t *retcount, int maxcount);
 int aatransi_port_create(uint32_t port_id, 
                                  aasdk_transport_port_config_t *p_cfg,
                                  uint32_t mtu, 
                                  uint8_t *system_id, 
-                                 uint8_t *iface_macaddr);
+                                 uint8_t *if_macaddr);
 int aatransi_port_delete(uint32_t port_id);
 
 #endif /* AATRANS_PORT_COMM_H */
