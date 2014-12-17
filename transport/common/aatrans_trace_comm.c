@@ -40,7 +40,6 @@ void aasdku_report(aasdk_trc_mod_id_t mod_id, const char *file, uint32_t line,
                    const char *function, const char *format, ...) {
 
     va_list args;
-    int charsPrinted = 0;
     char tempBuf[AA_TRACE_MAX_LINE_LENGTH];
     char buf[AA_TRACE_MAX_LINE_LENGTH];
     char *pBuf = buf;
@@ -55,7 +54,7 @@ void aasdku_report(aasdk_trc_mod_id_t mod_id, const char *file, uint32_t line,
     pBuf += prefix_len;
 
     va_start(args, format);
-    charsPrinted = vsnprintf(pBuf, AA_TRACE_MAX_LINE_LENGTH-1-prefix_len, format, args); /* this excludes '\0' */
+    vsnprintf(pBuf, AA_TRACE_MAX_LINE_LENGTH-1-prefix_len, format, args); /* this excludes '\0' */
     va_end(args);
 
     (*aasdk_output_func)(buf);

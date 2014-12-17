@@ -281,7 +281,7 @@ faAgentPerformRemoteListHostRemoval (unsigned int unit, unsigned int port)
     int saveToNv = 0;
     int elemCount = 0;
     unsigned int tmpIfIndex = 0;
-    unsigned int elemUnit, elemPort;
+    unsigned int elemUnit;
     faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
     faRemoteIsidVlanAsgnsEntry_t *tmpFaIsidVlanAsgn;
 
@@ -304,7 +304,7 @@ faAgentPerformRemoteListHostRemoval (unsigned int unit, unsigned int port)
         /* Search for entries associated with the target unit and */
         /* port (if non-zero) and initiate list removal actions */
 
-        if ((port == 0) || (elemPort == port))
+        if (port == 0)
         {
             tmpFaIsidVlanAsgn = faIsidVlanAsgn->next;
 

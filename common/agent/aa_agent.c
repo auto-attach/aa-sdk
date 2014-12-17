@@ -784,8 +784,7 @@ faAgentProcessTimer (int timerId, int usrData)
     aasdk_msg_t msg;
 
     /* Compiler happiness */
-    if (timerId)
-        ;
+    (void ) timerId;
 
     memset(&msg, 0, sizeof(msg));
 
