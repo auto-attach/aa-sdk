@@ -30,7 +30,7 @@ OBJS = \
 	common/common/aasdk_port_comm.o \
 	common/common/aasdk_time_comm.o \
 	common/common/aasdk_lldpif_comm.o \
-        common/common/aasdk_asgn_comm.o \
+	common/common/aasdk_asgn_comm.o \
 	platform/posix/aasdk_msgif_plat.o \
 	platform/posix/aasdk_osif_plat.o \
 	platform/posix/aasdk_time_plat.o \

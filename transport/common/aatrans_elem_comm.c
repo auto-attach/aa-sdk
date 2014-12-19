@@ -28,8 +28,8 @@
 
 int
 aatrans_asgn_data_set(aasdk_port_id_t port_id, int status,
-                     uint32_t isid, uint16_t vlan,
-		     bool enable, bool local)
+                      uint32_t isid, uint16_t vlan,
+                      bool enable, bool local)
 {
     struct lldpd_hardware *hardware;
     struct lldpd_aa_isid_vlan_maps_tlv *isid_vlan_map = NULL;
@@ -285,15 +285,3 @@ aatransi_print_element_status(print_func_t print_func, void *arg)
 //
 //    return NULL;
 //}
-//
-//typedef enum {
-//    1,
-//    2,
-//    3,
-//    4
-//} array_size_t;
-//
-
-
-
-

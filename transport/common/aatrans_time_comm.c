@@ -58,7 +58,7 @@ aatransi_time_tick(struct timespec *curr)
     else {
         aatrans_sum = aatrans_zero;
         aasdk_trace(aa_verbose, "ticking every %d seconds", (int)aatrans_wait.tv_sec);
-	aatransi_send_pdu();
+        aatransi_send_pdu();
     }
 
 }
