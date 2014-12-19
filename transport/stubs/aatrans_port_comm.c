@@ -26,7 +26,7 @@
 #define AASDK_TRC_MOD_ID aasdk_mod_aatrans_port
 
 int
-aatransi_port_create(uint32_t port_id,
+aatransi_port_create(aasdk_port_id_t port_id,
                      aasdk_transport_port_config_t *p_cfg,
                      uint32_t mtu, uint8_t *system_id, 
                      uint8_t *iface_macaddr)
@@ -37,7 +37,7 @@ aatransi_port_create(uint32_t port_id,
 }
 
 int
-aatransi_port_delete(uint32_t port_id)
+aatransi_port_delete(aasdk_port_id_t port_id)
 {
     aasdk_trace(aa_verbose, "entering, port_id=%d", port_id);
 
@@ -45,7 +45,7 @@ aatransi_port_delete(uint32_t port_id)
 }
 
 int
-aatransi_port_admin_get(uint32_t port_id)
+aatransi_port_admin_get(aasdk_port_id_t port_id)
 {
     aasdk_trace(aa_verbose, "entering, port_id=%d", port_id);
 

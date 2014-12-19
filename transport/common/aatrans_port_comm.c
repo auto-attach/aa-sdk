@@ -31,7 +31,7 @@
    the ifindex associated with the first MLT port member should be passed in.
  */
 int
-aatransi_port_create(uint32_t port_id,
+aatransi_port_create(aasdk_port_id_t port_id,
                      aasdk_transport_port_config_t *p_cfg,
                      uint32_t mtu, uint8_t *system_id, 
                      uint8_t *if_macaddr)
@@ -105,7 +105,7 @@ aatransi_port_create(uint32_t port_id,
 }
 
 int
-aatransi_port_delete(uint32_t port_id)
+aatransi_port_delete(aasdk_port_id_t port_id)
 {
     struct lldpd_hardware *hardware;
     uint8_t sys_id[AASDK_ELEMENT_SYSTEM_ID_LEN] = {0};
@@ -142,7 +142,7 @@ aatransi_port_delete(uint32_t port_id)
 
 /* caller is responsible for allocating and freeing the supplied data storage */
 int
-aatransi_port_data_get(uint32_t port_id,
+aatransi_port_data_get(aasdk_port_id_t port_id,
                        aasdk_transport_port_config_t *p_cfg,
                        uint32_t *mtu, uint8_t *system_id, 
                        uint8_t *if_macaddr)
@@ -182,7 +182,7 @@ aatransi_port_data_get(uint32_t port_id,
 }
 
 int
-aatransi_port_admin_get(uint32_t port_id)
+aatransi_port_admin_get(aasdk_port_id_t port_id)
 {
     struct lldpd_hardware *hardware;
 
