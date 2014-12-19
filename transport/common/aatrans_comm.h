@@ -100,7 +100,6 @@ int aatransi_notification_interval_get(uint32_t *ret_val);
 
 int aatransi_chassis_macaddr_set(uint8_t *macaddr);
 int aatransi_mtu_set(uint32_t mtu);
-int aatransi_send_pdu();
 int aatransi_asgn_data_set(aasdk_port_id_t port_id, int status,
                            uint32_t isid, uint16_t vlan,
                            bool enable);
@@ -109,6 +108,17 @@ int aatransi_disc_mgmt_vlan_set(uint16_t mgmt_vlan);
 int aatransi_disc_sys_id_set(aasdk_port_id_t port_id, uint8_t *sys_id);
 int aatransi_packet_process(char *buffer, uint32_t buf_size, aasdk_port_id_t port_id);
 int aatransi_packet_compose(char *buffer, uint32_t buf_size, aasdk_port_id_t port_id);
+#ifdef ENABLE_AASERVER
+int aatransi_packet_process(char *buffer, uint32_t buf_size, 
+                            aasdk_port_id_t port_id, void *cfg_param);
+int aatransi_packet_compose(char *buffer, uint32_t buf_size, 
+                            aasdk_port_id_t port_id, void *cfg_param);
+#else
+int aatransi_packet_process(char *buffer, uint32_t buf_size, 
+                            aasdk_port_id_t port_id);
+int aatransi_packet_compose(char *buffer, uint32_t buf_size, 
+                            aasdk_port_id_t port_id);
+#endif
 int aatransi_send_pdu(void);
 int aatransx_auth_key_set(aasdk_port_id_t port_id,
                           uint8_t *key, size_t key_len);

@@ -27,10 +27,20 @@
 /*
  * process packet
  */
+#ifdef ENABLE_AASERVER
 int
-aatransi_packet_process(char *buffer, uint32_t buf_size, aasdk_port_id_t port_id)
+aatransi_packet_process(char *buffer, uint32_t buf_size, 
+                        aasdk_port_id_t port_id, void *cfg_param)
+#else
+int
+aatransi_packet_process(char *buffer, uint32_t buf_size, 
+                        aasdk_port_id_t port_id)
+#endif
 {
     struct lldpd_hardware *hardware = NULL;
+#ifdef ENABLE_AASERVER
+    struct lldpd *cfg = (struct lldpd *) cfg_param;
+#endif
 
     aasdk_trace(aa_verbose, "processing packet received on port_id %d", port_id);
 
@@ -50,11 +60,21 @@ aatransi_packet_process(char *buffer, uint32_t buf_size, aasdk_port_id_t port_id
 /*
  * compose packet
  */
+#ifdef ENABLE_AASERVER
 int
-aatransi_packet_compose(char *buffer, uint32_t buf_size, aasdk_port_id_t port_id)
+aatransi_packet_compose(char *buffer, uint32_t buf_size, 
+                        aasdk_port_id_t port_id, void *cfg_param)
+#else
+int
+aatransi_packet_compose(char *buffer, uint32_t buf_size, 
+                        aasdk_port_id_t port_id)
+#endif
 {
     struct lldpd_hardware *hardware = NULL;
     uint32_t lldp_size = 0;
+#ifdef ENABLE_AASERVER
+    struct lldpd *cfg = (struct lldpd *) cfg_param;
+#endif
 
     aasdk_trace(aa_verbose, "composing packet for port_id %d", port_id);
 
@@ -83,7 +103,6 @@ int
 aatransi_send_pdu(void)
 {
     struct lldpd_hardware *hardware;
-    uint32_t len;
     char *buf = NULL;
 
     if ((buf = (char *) calloc(1, AASDK_TRANSPORT_PACKET_MAX_SIZE)) == NULL) {
@@ -93,12 +112,14 @@ aatransi_send_pdu(void)
     
     TAILQ_FOREACH(hardware, &cfg->g_hardware, h_entries) {
         // construct the TLVs
-        len = aatransi_packet_compose(buf, 
+#ifndef ENABLE_AASERVER
+        uint32_t len = aatransi_packet_compose(buf, 
                                       AASDK_TRANSPORT_PACKET_MAX_SIZE, 
                                       (aasdk_port_id_t)hardware->h_ifindex);
         if (cfg_ext.send) {
             (cfg_ext.send)(hardware->h_ifindex, buf, len);
         }
+#endif
         /* upon return from send, clear the buffer for the next interface */
         memset(buf, 0, AASDK_TRANSPORT_PACKET_MAX_SIZE);
     }
