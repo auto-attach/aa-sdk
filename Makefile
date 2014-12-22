@@ -30,16 +30,16 @@ OBJS = \
 	common/common/aasdk_port_comm.o \
 	common/common/aasdk_time_comm.o \
 	common/common/aasdk_lldpif_comm.o \
-        common/common/aasdk_asgn_comm.o \
+	common/common/aasdk_asgn_comm.o \
 	platform/posix/aasdk_msgif_plat.o \
 	platform/posix/aasdk_osif_plat.o \
 	platform/posix/aasdk_time_plat.o \
 	platform/posix/aasdk_lldpif_plat.o \
-	lldp/src/compat/strlcpy.o \
-	lldp/src/daemon/liblldpd_la-frame.o \
-	lldp/src/daemon/liblldpd_la-lldp.o \
-	lldp/src/daemon/liblldpd_la-lldpd.o \
 	lldp/src/lldpd-structs.o \
+	lldp/src/compat/strlcpy.o \
+	lldp/src/daemon/liblldpd_la-lldp.o \
+	lldp/src/daemon/liblldpd_la-frame.o \
+	lldp/src/daemon/liblldpd_la-lldpd.o \
 	lldp/src/log.o \
 	transport/common/aatrans_trace_comm.o \
         transport/common/aatrans_auth_comm.o \

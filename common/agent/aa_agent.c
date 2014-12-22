@@ -659,9 +659,9 @@ faAgent_main_proc(aasdk_msg_t *pmsg)
 
 	minAsgn.isid   = msg.arg1;
 	minAsgn.vlan   = msg.arg2;
-        minAsgn.status = msg.arg4;
+	minAsgn.status = msg.arg4;
 
-        faUpdateRemoteIsidVlanAsgns(msg.arg0, 1, &minAsgn);
+	faUpdateRemoteIsidVlanAsgns(msg.arg0, 1, &minAsgn);
 
 	break;
 #endif /* def FA_ASSIGNMENT */
@@ -769,8 +769,7 @@ faAgentProcessTimer (int timerId, int usrData)
     aasdk_msg_t msg;
 
     /* Compiler happiness */
-    if (timerId)
-        ;
+    (void ) timerId;
 
     memset(&msg, 0, sizeof(msg));
 
