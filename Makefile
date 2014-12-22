@@ -35,11 +35,11 @@ OBJS = \
 	platform/posix/aasdk_osif_plat.o \
 	platform/posix/aasdk_time_plat.o \
 	platform/posix/aasdk_lldpif_plat.o \
-	lldp/src/compat/strlcpy.o \
-	lldp/src/daemon/liblldpd_la-frame.o \
-	lldp/src/daemon/liblldpd_la-lldp.o \
-	lldp/src/daemon/liblldpd_la-lldpd.o \
 	lldp/src/lldpd-structs.o \
+	lldp/src/compat/strlcpy.o \
+	lldp/src/daemon/liblldpd_la-lldp.o \
+	lldp/src/daemon/liblldpd_la-frame.o \
+	lldp/src/daemon/liblldpd_la-lldpd.o \
 	lldp/src/log.o \
 	transport/common/aatrans_trace_comm.o \
         transport/common/aatrans_auth_comm.o \
@@ -73,6 +73,9 @@ posix:
 # Rebuild the lldp vincent-bernat lldp from scratch.
 lldpnew: FORCE
 	/bin/bash -c 'cd lldp; ./autogen.sh; ./configure; make -j'
+
+aaserver: FORCE
+	/bin/bash -c 'cd lldp; ./autogen.sh; ./configure --enable-aaserver --enable-privsep=NO; make -j'
 
 lldp:   FORCE
 	/bin/bash -c 'cd lldp; make -j'
