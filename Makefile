@@ -74,6 +74,9 @@ posix:
 lldpnew: FORCE
 	/bin/bash -c 'cd lldp; ./autogen.sh; ./configure; make -j'
 
+aaserver: FORCE
+	/bin/bash -c 'cd lldp; ./autogen.sh; ./configure --enable-aaserver --enable-privsep=NO; make -j'
+
 lldp:   FORCE
 	/bin/bash -c 'cd lldp; make -j'
 

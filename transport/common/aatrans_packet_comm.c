@@ -28,12 +28,10 @@
  * process packet
  */
 #ifdef ENABLE_AASERVER
-int
-aatransi_packet_process(char *buffer, uint32_t buf_size, 
+aatransi_packet_process(char *buffer, uint32_t buf_size,
                         aasdk_port_id_t port_id, void *cfg_param)
 #else
-int
-aatransi_packet_process(char *buffer, uint32_t buf_size, 
+aatransi_packet_process(char *buffer, uint32_t buf_size,
                         aasdk_port_id_t port_id)
 #endif
 {
@@ -61,13 +59,10 @@ aatransi_packet_process(char *buffer, uint32_t buf_size,
  * compose packet
  */
 #ifdef ENABLE_AASERVER
-int
-aatransi_packet_compose(char *buffer, uint32_t buf_size, 
+aatransi_packet_compose(char *buffer, uint32_t buf_size,
                         aasdk_port_id_t port_id, void *cfg_param)
 #else
-int
-aatransi_packet_compose(char *buffer, uint32_t buf_size, 
-                        aasdk_port_id_t port_id)
+aatransi_packet_compose(char *buffer, uint32_t buf_size, aasdk_port_id_t port_id)
 #endif
 {
     struct lldpd_hardware *hardware = NULL;
@@ -109,13 +104,14 @@ aatransi_send_pdu(void)
         aasdk_log("Error: unable to allocate memory for pdu");
         return AA_SDK_ENOMEM;
     }
-    
+
     TAILQ_FOREACH(hardware, &cfg->g_hardware, h_entries) {
         // construct the TLVs
 #ifndef ENABLE_AASERVER
-        uint32_t len = aatransi_packet_compose(buf, 
-                                      AASDK_TRANSPORT_PACKET_MAX_SIZE, 
-                                      (aasdk_port_id_t)hardware->h_ifindex);
+        uint32_t len =
+            aatransi_packet_compose(buf,
+                                    AASDK_TRANSPORT_PACKET_MAX_SIZE,
+                                    (aasdk_port_id_t)hardware->h_ifindex);
         if (cfg_ext.send) {
             (cfg_ext.send)(hardware->h_ifindex, buf, len);
         }
