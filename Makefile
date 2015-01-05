@@ -87,6 +87,6 @@ clean: $(CLEANDIRS)
 	/bin/bash -c 'cd lldp; make clean'
 
 distclean: clean
-	/bin/bash -c 'cd lldp; make distclean'
+	/bin/bash -c 'cd lldp; make distclean; rm configure'
 
 FORCE:
