@@ -42,7 +42,7 @@ OBJS = \
 	lldp/src/daemon/liblldpd_la-lldpd.o \
 	lldp/src/log.o \
 	transport/common/aatrans_trace_comm.o \
-        transport/common/aatrans_auth_comm.o \
+    transport/common/aatrans_auth_comm.o \
 	transport/common/aatrans_elem_comm.o \
 	transport/common/aatrans_packet_comm.o \
 	transport/common/aatrans_port_comm.o \
@@ -57,7 +57,6 @@ LIBS = \
 SUBDIRS = apps/engtest apps/lldp common/agent common/common common/stubs platform/posix platform/stubs transport/common transport/stubs
 CLEANDIRS = $(SUBDIRS:%=clean-%)
 
-
 .PHONY: subdirs $(SUBDIRS)
      
 all: lldp subdirs posix
@@ -71,14 +70,14 @@ posix:
 	$(CC) -o $(OUTPUT) $(OBJS) $(LIBS)
 
 # Rebuild the lldp vincent-bernat lldp from scratch.
-lldpnew: FORCE
+lldp/configure:
 	/bin/bash -c 'cd lldp; ./autogen.sh; ./configure; make -j'
+
+lldp:	lldp/configure
+	/bin/bash -c 'cd lldp; make -j'
 
 aaserver: FORCE
 	/bin/bash -c 'cd lldp; ./autogen.sh; ./configure --enable-aaserver --enable-privsep=NO; make -j'
-
-lldp:   FORCE
-	/bin/bash -c 'cd lldp; make -j'
 
 $(CLEANDIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
@@ -89,8 +88,5 @@ clean: $(CLEANDIRS)
 
 distclean: clean
 	/bin/bash -c 'cd lldp; make distclean'
-
-
-
 
 FORCE:
