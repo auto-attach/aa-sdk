@@ -279,7 +279,7 @@ aaPortStatusGet(aasdk_port_id_t portId,
 
     /* fill in the AA port data */
 
-    memset(portStatus, 0, sizeof(portStatus));
+    memset(portStatus, 0, sizeof(*portStatus));
     
     portStatus->port_id = pPort->id;
     portStatus->enabled = pPort->ena;

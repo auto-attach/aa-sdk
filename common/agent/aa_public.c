@@ -23,6 +23,8 @@
 
 #include "aasdk_osif_comm.h"
 
+int aasdkx_ports_data_ena_set(bool enable); // compiler warning
+
 /**************************************************************
  * Name: faAgentServiceEnabled
  * Description:
@@ -219,6 +221,7 @@ faAgentGetRemoteIsidVlanAsgnsCount ()
 {
     return (faAgentConfigData.faRemoteIsidVlanAsgnsCount);
 }
+
 
 int
 faAgentSetServiceStatus (int status,
@@ -1614,7 +1617,7 @@ int
 faGetRemoteServerInfo (faRemoteServerInfo_t *serverInfo)
 {
     int rc = 0;
-    unsigned int ifIndex;
+    unsigned int ifIndex=0; // TBD
 
     if (serverInfo != NULL) 
     {

@@ -2491,7 +2491,6 @@ faUpdateRemoteIsidVlanAsgns (unsigned int updateData,
 #if FA_REM_ASSIGNMENT
 
     int count = 0;
-    int activeCount = 0;
     faIsidVlanAsgnStates asgnState;
     faMinIsidVlanBindingEntry_t faIsidVlanAsgn;
 
@@ -2545,6 +2544,7 @@ faUpdateRemoteIsidVlanAsgns (unsigned int updateData,
                                                   faIsidVlanAsgn.vlan,
                                                   faIsidVlanAsgn.status,
                                                   elemType, elemVlan);
+            (void)asgnState; // compiler warning
 
 #ifdef SYSDEF_INCLUDE_FA_SMLT
 
@@ -3230,7 +3230,7 @@ faDiscoveredElementsQuery (int ifIndex,
 void
 faDiscoveredElementsDump ()
 {
-    unsigned int i, unit, port;
+    unsigned int i, unit, port=0;
     char buffer[16];
     faDiscoveredElementsEntry_t *faDiscElem;
 

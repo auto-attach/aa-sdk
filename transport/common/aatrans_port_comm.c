@@ -14,6 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "config.h" /* for ENABLE_AASERVER */
 #include <stdint.h>
 #include <stdbool.h>
 #include "sys/queue.h"
@@ -33,7 +34,11 @@
 int
 aatransi_port_create(aasdk_port_id_t port_id,
                      aasdk_transport_port_config_t *p_cfg,
-                     uint32_t mtu, uint8_t *system_id, 
+                     uint32_t mtu, uint8_t *system_id,
+#ifdef ENABLE_AASERVER
+                     struct lldpd_ops * ops,
+                     int h_sendfd,
+#endif
                      uint8_t *if_macaddr)
 {
     struct lldpd_hardware *hardware;
@@ -65,6 +70,10 @@ aatransi_port_create(aasdk_port_id_t port_id,
     hardware->h_flags |= IFF_RUNNING;
     hardware->h_mtu = mtu;
     hardware->h_lport.p_id_subtype = p_cfg->port_id_subtype;
+#ifdef ENABLE_AASERVER
+    hardware->h_sendfd = h_sendfd;
+    hardware->h_ops = ops;
+#endif
     if ((hardware->h_lport.p_id = (char *) 
          calloc(1, p_cfg->port_id_len)) == NULL) {
         aasdk_log("Error: failed to allocate memory for port_id");
@@ -74,11 +83,12 @@ aatransi_port_create(aasdk_port_id_t port_id,
     hardware->h_lport.p_id_len = p_cfg->port_id_len;
     
     /* Auto Attach element tlv */
-    hardware->h_lport.p_element.type = cfg_ext.aa_element_type;;
+    hardware->h_lport.p_element.type = cfg_ext.aa_element_type;
     hardware->h_lport.p_element.mgmt_vlan = cfg_ext.aa_element_mgmt_vlan;
     memcpy(hardware->h_lladdr, if_macaddr, AASDK_MAC_ADDR_LEN);
     memcpy(&hardware->h_lport.p_element.system_id, system_id, 
            AASDK_ELEMENT_SYSTEM_ID_LEN);
+
 
 //...TBD check to make sure the interface does not already exist prior to adding
 

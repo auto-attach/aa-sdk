@@ -16,6 +16,7 @@
 #ifndef AATRANS_PORT_COMM_H
 #define AATRANS_PORT_COMM_H
 
+#include "config.h" 
 typedef struct {
     /* PORT ID TLV */
     uint32_t port_id_subtype;
@@ -76,6 +77,10 @@ int aatransi_port_create(aasdk_port_id_t port_id,
                                  aasdk_transport_port_config_t *p_cfg,
                                  uint32_t mtu, 
                                  uint8_t *system_id, 
+#ifdef ENABLE_AASERVER
+                                 struct lldpd_ops * ops,
+                                 int h_sendfd,
+#endif
                                  uint8_t *if_macaddr);
 int aatransi_port_delete(aasdk_port_id_t port_id);
 

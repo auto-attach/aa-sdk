@@ -73,7 +73,7 @@ faDownlinkAutoAttachProcessing (unsigned int elemVlan,
 
     rc = 1;
 
-faDownlinkAutoAttachProcessingRet:
+//faDownlinkAutoAttachProcessingRet:
 
     return (rc);
 }
@@ -101,7 +101,6 @@ faAgentPerformRemoteListMaintenance (unsigned int expiration,
     int asgnIssues = 0;
     int saveToNv = 0;
     int i, elemCount = 0;
-    int peerMsgCount = 0;
     unsigned int currentTime;
     faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
 
@@ -212,6 +211,7 @@ faAgentPerformRemoteListMaintenance (unsigned int expiration,
             {
                 saveToNv = 1;
             }
+            (void) saveToNv; // compiler check
 
             /* Initiate settings cleanup - deactivate assignments */
             if (! faServerAsgnRejectionProcessing(faIsidVlanAsgn,
@@ -287,7 +287,6 @@ faAgentPerformRemoteListHostRemoval (unsigned int unit, unsigned int port)
     int saveToNv = 0;
     int elemCount = 0;
     unsigned int tmpIfIndex = 0;
-    unsigned int elemUnit;
     faRemoteIsidVlanAsgnsEntry_t *faIsidVlanAsgn;
     faRemoteIsidVlanAsgnsEntry_t *tmpFaIsidVlanAsgn;
 
@@ -349,6 +348,7 @@ faAgentPerformRemoteListHostRemoval (unsigned int unit, unsigned int port)
             {
                 saveToNv = 1;
             }
+            (void) saveToNv; // compiler check
 
             if (port == 0)
             {
@@ -459,6 +459,7 @@ faAgentSyncRemoteTrunkMembers (faRemoteIsidVlanAsgnsEntry_t *tgtFaIsidVlanAsgn)
             {
                 saveToNv = 1;
             }
+            (void) saveToNv; // compiler check
         }
 
         tmpFaIsidVlanAsgn = tmpFaIsidVlanAsgn->next;
@@ -592,11 +593,11 @@ faServerAsgnRejectionExternalAppAccess (faRemoteIsidVlanAsgnsEntry_t *faRemIsidV
 {
     int rc = 0;
 
+    (void) unit;
 #if FA_REM_ASSIGNMENT
     int failureSeen = 0;
     char vlanStr[32];
     char portStr[32];
-    int tmpUnit, vlanMembersPresent = 0;
 
     if (faRemIsidVlanAsgn == NULL)
     {
@@ -704,7 +705,7 @@ faServerAsgnRejectionProcessing (faRemoteIsidVlanAsgnsEntry_t *faRemIsidVlanAsgn
 
 #if FA_ASSIGNMENT
 
-    unsigned int unit, port;
+    unsigned int unit=0, port=0;
 
     faAgentErrorMsg(FA_AGENT_INFO_CALL_TRACE_0, FA_AGENT_INFO_MSG_4,
                     "faServerAsgnRejectionProcessing", 0, 0, 0, NULL);
@@ -804,7 +805,7 @@ faServerProcessRemoteElem (unsigned int interface,
     faIsidVlanAsgnStates asgnState = FA_AGENT_ISID_VLAN_ASGN_UNKNOWN;
 
     int trunkId = 0;
-    unsigned int unit = 0, port = 0;
+    unsigned int port = 0;
 
     aasdkx_mutex_lock(faAgentMut);
 
@@ -837,6 +838,7 @@ faServerProcessRemoteElem (unsigned int interface,
 
                     asgnState = FA_AGENT_ISID_VLAN_ASGN_ACTIVE;
                     saveToNv = 1;
+                    (void) saveToNv; // compiler check
                 }
                 else
                 {
@@ -928,6 +930,7 @@ faServerProcessRemoteElem (unsigned int interface,
             aaPortStatInc(tmpFaIsidVlanAsgn.ifIndex,
                            offsetof(aasdk_stats_data_t, aasdk_asgn_accepted));
             saveToNv = 1;
+            (void) saveToNv; // compiler check
         }
         else
         {
@@ -1021,6 +1024,7 @@ faServerAsgnReset (int notifyLldp)
 
             saveToNv = 1;
         }
+        (void) saveToNv; // compiler check
 
         faIsidVlanAsgn = faIsidVlanAsgn->next;
     }
@@ -1123,6 +1127,7 @@ faAgentPerformRemoteListPeerRemoval (void)
             {
                 saveToNv = 1;
             }
+            (void) saveToNv; // compiler check
 
             faRemoteIsidVlanAsgnDelete(faIsidVlanAsgn, FA_NO_NOTIFY_LLDP);
 
