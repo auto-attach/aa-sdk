@@ -111,12 +111,14 @@ aatransi_send_pdu(void)
         if (cfg_ext.send) {
            (cfg_ext.send)(hardware->h_ifindex, buf, len);
         }
+#ifdef ENABLE_AASERVER
         else if (interfaces_send_helper(cfg, hardware, (char *)buf, len) == -1) {
            log_warn("lldp", "unable to send packet on real device for %s",
                hardware->h_ifname);
                free(buf);
             return AA_SDK_EFAULT;
         }
+#endif
         /* upon return from send, clear the buffer for the next interface */
         memset(buf, 0, AASDK_TRANSPORT_PACKET_MAX_SIZE);
     }
